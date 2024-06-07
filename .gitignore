@@ -1,0 +1,11 @@
+.idea
+.env
+vendor
+
+
+var/cache/prod/*
+var/cache/dev/*
+
+
+var/log/*
+!var/log/.gitkeep

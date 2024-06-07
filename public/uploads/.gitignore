@@ -1,0 +1,7 @@
+*
+!audiences/
+!categories/
+!homepage/
+!layout/
+!payment/gateways/
+!.gitignore
