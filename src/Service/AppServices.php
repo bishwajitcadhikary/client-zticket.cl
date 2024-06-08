@@ -3,6 +3,8 @@
 namespace App\Service;
 
 use Doctrine\ORM\EntityManagerInterface;
+use GuzzleHttp\Client;
+use GuzzleHttp\Exception\GuzzleException;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpKernel\KernelInterface;
 use GeoIp2\Database\Reader;
@@ -251,6 +253,110 @@ class AppServices {
         $this->em->flush();
         if ($order->getUser()->hasRole("ROLE_ATTENDEE")) {
             $this->sendOrderConfirmationEmail($order, $order->getPayment()->getClientEmail());
+            $this->sendElectronicInvoiceConfirmationEmail($order, $order->getPayment()->getClientEmail());
+        }
+    }
+
+    public function sendelectronicinvoiceconfirmationemail($order, $emailTo): bool
+    {
+        $items = [];
+        $mntTotal = $order->getTotalTicketFees();
+
+        foreach ($order->getOrderelements() as $index => $orderelement){
+            $items[] = [
+                'IndExe' => 1,
+                'NroLinDet' => $index + 1,
+                'NmbItem' => $orderelement->getEventticket()->getName(),
+                'QtyItem' => $orderelement->getQuantity(),
+                'PrcItem' => (int)round($orderelement->getUnitprice()),
+                'MontoItem' => (int)round($orderelement->getUnitprice() * $orderelement->getQuantity()),
+            ];
+
+            $mntTotal += $orderelement->getUnitprice() * $orderelement->getQuantity();
+        }
+
+        // Add Service Charge
+        $items[] = [
+            'IndExe' => 1,
+            'NroLinDet' => count($items) + 1,
+            'NmbItem' => 'Service Charge',
+            'QtyItem' => 1,
+            'PrcItem' => (int)round($order->getTotalTicketFees()),
+            'MontoItem' => (int)round($order->getTotalTicketFees()),
+        ];
+
+
+        $totals = [
+            'MntExe' => (int)round($mntTotal),
+            'IVA' => (int)round($order->getTotalTicketFees() / 1.19),
+            'MntTotal' => (int)round($mntTotal),
+        ];
+
+
+        try {
+            $httpClient = new Client();
+
+            $response = $httpClient->request('POST', 'https://dev-api.haulmer.com/v2/dte/document', [
+                'headers' => [
+                    'apikey' => '928e15a2d14d4a6292345f04960f4bd3',
+                    'idempotency-key' => rand(100000, 999999),
+                    'Content-Type' => 'application/json',
+                ],
+                'json' => [
+                    "response" => [
+                        "PDF",
+                        "80MM"
+                    ],
+                    "dte" => [
+                        "Encabezado" => [
+                            "IdDoc" => [
+                                "TipoDTE" => 52,
+                                "Folio" => 2894,
+                                "FchEmis" => "2024-02-20",
+                                "TpoTranCompra" => "1",
+                                "TpoTranVenta" => "1",
+                                "FmaPago" => "2"
+                            ],
+                            "Emisor" => [
+                                "RUTEmisor" => "76795561-8",
+                                "RznSoc" => "HAULMER SPA",
+                                "GiroEmis" => "VENTA AL POR MENOR POR CORREO, POR INTERNET Y VIA TELEFONICA",
+                                "Acteco" => "479100",
+                                "DirOrigen" => "ARTURO PRAT 527   CURICO",
+                                "CmnaOrigen" => "Curicó",
+                                "Telefono" => "0 0",
+                                "CdgSIISucur" => "81303347"
+                            ],
+                            "Receptor" => [
+                                "RUTRecep" => "76430498-5",
+                                "RznSocRecep" => "HOSTY SPA",
+                                "GiroRecep" => "ACTIVIDADES DE CONSULTORIA DE INFORMATIC",
+                                "DirRecep" => "ARTURO PRAT 527 3 pis OF 1",
+                                "CmnaRecep" => "Curicó"
+                            ],
+                            "Totales" => $totals
+                        ],
+                        "Detalle" => $items
+                    ]
+                ]
+            ]);
+
+            $response = json_decode($response->getBody()->getContents(), true);
+
+            $pdf = base64_decode($response['PDF']);
+
+            $email = (new \Swift_Message('Electronic Invoice'))
+                ->setFrom($this->getSetting('no_reply_email'),  $this->getSetting('website_name'))
+                ->setTo($emailTo)
+                ->setBody($this->templating->render('Dashboard/Shared/Order/confirmation-email.html.twig', ['order' => $order]), 'text/html')
+                ->attach(new \Swift_Attachment($pdf, 'invoice.pdf', 'application/pdf'));
+
+            $this->mailer->send($email);
+
+            return 1;
+
+        }catch (GuzzleException $e){
+            return 0;
         }
     }
 

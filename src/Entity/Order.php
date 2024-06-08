@@ -210,7 +210,15 @@ class Order {
         if (!$this->getTicketFee()) {
             return 0;
         }
-        return $this->getNotFreeOrderElementsQuantitySum() * $this->getTicketFee();
+
+        $sum = 0;
+
+        foreach ($this->getOrderelements() as $orderelement) {
+            $price = $orderelement->getPrice();
+            $fee = $this->getTicketFee();
+            $sum += $price * $fee / 100;
+        }
+        return (float) $sum;
     }
 
     public function getTotalFees() {
