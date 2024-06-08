@@ -336,8 +336,14 @@ class User extends BaseUser implements UserInterface {
             return 0;
         }
         $sum = 0;
+
         foreach ($this->cartelements as $cartelement) {
-            $sum += $cartelement->getQuantity() * $cartelement->getTicketFee();
+            //$sum += $cartelement->getQuantity() * $cartelement->getTicketFee();
+
+            $price = $cartelement->getPrice();
+            $fee = $cartelement->getTicketFee();
+            $fee = $price * $fee / 100;
+            $sum += $fee;
         }
         return (float) $sum;
     }

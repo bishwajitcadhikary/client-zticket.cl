@@ -2,106 +2,113 @@
 
 namespace App\Controller\Dashboard\Administrator;
 
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
-use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\Validator\Constraints\NotBlank;
-use Symfony\Component\Validator\Constraints\NotNull;
-use Symfony\Bridge\Doctrine\Form\Type\EntityType;
-use Symfony\Component\Form\Extension\Core\Type\TextType;
-use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
-use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use App\Entity\Currency;
 use App\Entity\PaymentGateway;
-use App\Service\AppServices;
-use Symfony\Contracts\Translation\TranslatorInterface;
-use App\Form\HomepageHeroSettingsType;
-use App\Form\PaymentGatewayType;
 use App\Form\AppLayoutSettingsType;
+use App\Form\HomepageHeroSettingsType;
 use App\Form\MenuType;
+use App\Form\PaymentGatewayType;
+use App\Service\AppServices;
+use Exception;
+use Swift_Mailer;
+use Swift_Message;
+use Symfony\Bridge\Doctrine\Form\Type\EntityType;
+use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
+use Symfony\Component\Form\Extension\Core\Type\SubmitType;
+use Symfony\Component\Form\Extension\Core\Type\TextType;
+use Symfony\Component\Form\FormError;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Validator\Constraints\NotBlank;
+use Symfony\Component\Validator\Constraints\NotNull;
+use Symfony\Contracts\Translation\TranslatorInterface;
+use Twig_Environment;
 
-class SettingsController extends Controller {
+class SettingsController extends Controller
+{
 
     /**
      * @Route("/settings/payment", name="settings_payment", methods="GET|POST")
      */
-    public function payment(Request $request, AppServices $services, TranslatorInterface $translator) {
+    public function payment(Request $request, AppServices $services, TranslatorInterface $translator)
+    {
 
         $form = $this->createFormBuilder()
-                ->add('currency', EntityType::class, [
-                    'required' => true,
-                    'multiple' => false,
-                    'expanded' => false,
-                    'class' => Currency::class,
-                    'choice_label' => 'ccy',
-                    'label' => 'Currency',
-                    'attr' => ['class' => 'select2'],
-                    'constraints' => array(
-                        new NotBlank()
-                    ),
-                ])
-                ->add('position', ChoiceType::class, [
-                    'required' => true,
-                    'multiple' => false,
-                    'expanded' => true,
-                    'label' => 'Currency symbol position',
-                    'choices' => ['Left' => 'left', 'Right' => 'right'],
-                    'label_attr' => ['class' => 'radio-custom radio-inline'],
-                    'constraints' => array(
-                        new NotNull()
-                    ),
-                ])
-                ->add('ticket_fee_online', TextType::class, [
-                    'required' => true,
-                    'label' => 'Ticket fee (Online)',
-                    'help' => 'This fee will be added to the ticket sale price which are bought online, put 0 to disable additional fees for tickets which are bought online, does not apply for free tickets, will be applied to future orders',
-                    'attr' => ['class' => 'touchspin-decimal', 'data-min' => 0, "data-max" => 1000000],
-                ])
-                ->add('ticket_fee_pos', TextType::class, [
-                    'required' => true,
-                    'label' => 'Ticket fee (Point Of Sale)',
-                    'help' => 'This fee will be added to the ticket sale price which are bought from a point of sale, put 0 to disable additional fees for tickets which are bought from a point of sale, does not apply for free tickets, will be applied to future orders',
-                    'attr' => ['class' => 'touchspin-decimal', 'data-min' => 0, "data-max" => 1000000],
-                ])
-                ->add('online_ticket_price_percentage_cut', TextType::class, [
-                    'required' => true,
-                    'label' => 'Ticket price percentage cut (Online)',
-                    'help' => 'This percentage will be deducted from each ticket sold online, upon organizer payout request, this percentage will be taken from each ticket sold online, will be applied to future orders',
-                    'attr' => ['class' => 'touchspin-integer', 'data-min' => 0, "data-max" => 100],
-                ])
-                ->add('pos_ticket_price_percentage_cut', TextType::class, [
-                    'required' => true,
-                    'label' => 'Ticket price percentage cut (Point of sale)',
-                    'help' => 'This percentage will be deducted from each ticket sold on a point of sale, upon organizer payout request, this percentage will be taken from each ticket sold on a point of sale, will be applied to future orders',
-                    'attr' => ['class' => 'touchspin-integer', 'data-min' => 0, "data-max" => 100],
-                ])
-                ->add('organizer_payout_paypal_enabled', ChoiceType::class, [
-                    'required' => true,
-                    'multiple' => false,
-                    'expanded' => true,
-                    'label' => 'Allow Paypal as a payout method for the organizers to receive their revenue',
-                    'choices' => ['Yes' => 'yes', 'No' => 'no'],
-                    'label_attr' => ['class' => 'radio-custom radio-inline'],
-                    'constraints' => array(
-                        new NotNull()
-                    ),
-                ])
-                ->add('organizer_payout_stripe_enabled', ChoiceType::class, [
-                    'required' => true,
-                    'multiple' => false,
-                    'expanded' => true,
-                    'label' => 'Allow Stripe as a payout method for the organizers to receive their revenue',
-                    'choices' => ['Yes' => 'yes', 'No' => 'no'],
-                    'label_attr' => ['class' => 'radio-custom radio-inline'],
-                    'constraints' => array(
-                        new NotNull()
-                    ),
-                ])
-                ->add('save', SubmitType::class, [
-                    'label' => 'Save',
-                    'attr' => ['class' => 'btn btn-primary'],
-                ])
-                ->getForm();
+            ->add('currency', EntityType::class, [
+                'required' => true,
+                'multiple' => false,
+                'expanded' => false,
+                'class' => Currency::class,
+                'choice_label' => 'ccy',
+                'label' => 'Currency',
+                'attr' => ['class' => 'select2'],
+                'constraints' => array(
+                    new NotBlank()
+                ),
+            ])
+            ->add('position', ChoiceType::class, [
+                'required' => true,
+                'multiple' => false,
+                'expanded' => true,
+                'label' => 'Currency symbol position',
+                'choices' => ['Left' => 'left', 'Right' => 'right'],
+                'label_attr' => ['class' => 'radio-custom radio-inline'],
+                'constraints' => array(
+                    new NotNull()
+                ),
+            ])
+            ->add('ticket_fee_online', TextType::class, [
+                'required' => true,
+                'label' => 'Ticket fee (Online)',
+                'help' => 'This percentage fee will be added to the ticket sale price which are bought online, put 0 to disable additional fees for tickets which are bought online, does not apply for free tickets, will be applied to future orders',
+                'attr' => ['data-min' => 0, "data-max" => 1000000],
+            ])
+            ->add('ticket_fee_pos', TextType::class, [
+                'required' => true,
+                'label' => 'Ticket fee (Point Of Sale)',
+                'help' => 'This fee will be added to the ticket sale price which are bought from a point of sale, put 0 to disable additional fees for tickets which are bought from a point of sale, does not apply for free tickets, will be applied to future orders',
+                'attr' => ['class' => 'touchspin-decimal', 'data-min' => 0, "data-max" => 1000000],
+            ])
+            ->add('online_ticket_price_percentage_cut', TextType::class, [
+                'required' => true,
+                'label' => 'Ticket price percentage cut (Online)',
+                'help' => 'This percentage will be deducted from each ticket sold online, upon organizer payout request, this percentage will be taken from each ticket sold online, will be applied to future orders',
+                'attr' => ['class' => 'touchspin-integer', 'data-min' => 0, "data-max" => 100],
+            ])
+            ->add('pos_ticket_price_percentage_cut', TextType::class, [
+                'required' => true,
+                'label' => 'Ticket price percentage cut (Point of sale)',
+                'help' => 'This percentage will be deducted from each ticket sold on a point of sale, upon organizer payout request, this percentage will be taken from each ticket sold on a point of sale, will be applied to future orders',
+                'attr' => ['class' => 'touchspin-integer', 'data-min' => 0, "data-max" => 100],
+            ])
+            ->add('organizer_payout_paypal_enabled', ChoiceType::class, [
+                'required' => true,
+                'multiple' => false,
+                'expanded' => true,
+                'label' => 'Allow Paypal as a payout method for the organizers to receive their revenue',
+                'choices' => ['Yes' => 'yes', 'No' => 'no'],
+                'label_attr' => ['class' => 'radio-custom radio-inline'],
+                'constraints' => array(
+                    new NotNull()
+                ),
+            ])
+            ->add('organizer_payout_stripe_enabled', ChoiceType::class, [
+                'required' => true,
+                'multiple' => false,
+                'expanded' => true,
+                'label' => 'Allow Stripe as a payout method for the organizers to receive their revenue',
+                'choices' => ['Yes' => 'yes', 'No' => 'no'],
+                'label_attr' => ['class' => 'radio-custom radio-inline'],
+                'constraints' => array(
+                    new NotNull()
+                ),
+            ])
+            ->add('save', SubmitType::class, [
+                'label' => 'Save',
+                'attr' => ['class' => 'btn btn-primary'],
+            ])
+            ->getForm();
 
         $form->handleRequest($request);
 
@@ -133,41 +140,42 @@ class SettingsController extends Controller {
         }
 
         return $this->render('Dashboard/Administrator/Settings/payment.html.twig', [
-                    'form' => $form->createView()
+            'form' => $form->createView()
         ]);
     }
 
     /**
      * @Route("/settings/checkout", name="settings_checkout", methods="GET|POST")
      */
-    public function checkout(Request $request, AppServices $services, TranslatorInterface $translator) {
+    public function checkout(Request $request, AppServices $services, TranslatorInterface $translator)
+    {
 
         $form = $this->createFormBuilder()
-                ->add('checkout_timeleft', TextType::class, [
-                    'required' => true,
-                    'label' => 'Timeleft',
-                    'constraints' => array(
-                        new NotBlank()
-                    ),
-                    'attr' => ['class' => 'touchspin-integer', 'data-min' => 100, 'data-max' => 3600],
-                    'help' => 'Number of seconds before the reserved tickets are released if the order is still awaiting payment'
-                ])
-                ->add('show_tickets_left_on_cart_modal', ChoiceType::class, [
-                    'required' => true,
-                    'multiple' => false,
-                    'expanded' => true,
-                    'label' => 'Show tickets left count on cart modal',
-                    'choices' => ['Yes' => 'yes', 'No' => 'no'],
-                    'label_attr' => ['class' => 'radio-custom radio-inline'],
-                    'constraints' => array(
-                        new NotNull()
-                    ),
-                ])
-                ->add('save', SubmitType::class, [
-                    'label' => 'Save',
-                    'attr' => ['class' => 'btn btn-primary'],
-                ])
-                ->getForm();
+            ->add('checkout_timeleft', TextType::class, [
+                'required' => true,
+                'label' => 'Timeleft',
+                'constraints' => array(
+                    new NotBlank()
+                ),
+                'attr' => ['class' => 'touchspin-integer', 'data-min' => 100, 'data-max' => 3600],
+                'help' => 'Number of seconds before the reserved tickets are released if the order is still awaiting payment'
+            ])
+            ->add('show_tickets_left_on_cart_modal', ChoiceType::class, [
+                'required' => true,
+                'multiple' => false,
+                'expanded' => true,
+                'label' => 'Show tickets left count on cart modal',
+                'choices' => ['Yes' => 'yes', 'No' => 'no'],
+                'label_attr' => ['class' => 'radio-custom radio-inline'],
+                'constraints' => array(
+                    new NotNull()
+                ),
+            ])
+            ->add('save', SubmitType::class, [
+                'label' => 'Save',
+                'attr' => ['class' => 'btn btn-primary'],
+            ])
+            ->getForm();
 
         $form->handleRequest($request);
 
@@ -186,7 +194,7 @@ class SettingsController extends Controller {
         }
 
         return $this->render('Dashboard/Administrator/Settings/checkout.html.twig', array(
-                    "form" => $form->createView(),
+            "form" => $form->createView(),
         ));
     }
 
@@ -194,7 +202,8 @@ class SettingsController extends Controller {
      * @Route("/settings/payment/gateways/add", name="settings_payment_gateways_add", methods="GET|POST")
      * @Route("/settings/payment/gateways/{slug}/edit", name="settings_payment_gateways_edit", methods="GET|POST")
      */
-    public function paymentgatewaysaddedit(Request $request, AppServices $services, TranslatorInterface $translator, $slug = null) {
+    public function paymentgatewaysaddedit(Request $request, AppServices $services, TranslatorInterface $translator, $slug = null)
+    {
         $em = $this->getDoctrine()->getManager();
 
         if (!$slug) {
@@ -217,7 +226,7 @@ class SettingsController extends Controller {
             if (!$slug) {
                 $checkIfAnotherPGIsAddedWithSameFactoryName = $services->getPaymentGateways(array("gatewayFactoryName" => $paymentgateway->getFactoryName()))->getQuery()->getOneOrNullResult();
                 if ($checkIfAnotherPGIsAddedWithSameFactoryName) {
-                    $form->get('factoryName')->addError(new \Symfony\Component\Form\FormError($translator->trans('This payment gateway has already been added')));
+                    $form->get('factoryName')->addError(new FormError($translator->trans('This payment gateway has already been added')));
                 }
             }
 
@@ -236,44 +245,45 @@ class SettingsController extends Controller {
             }
         }
         return $this->render('Dashboard/Administrator/Settings/payment-gateway-add-edit.html.twig', array(
-                    "paymentgateway" => $paymentgateway,
-                    "form" => $form->createView(),
+            "paymentgateway" => $paymentgateway,
+            "form" => $form->createView(),
         ));
     }
 
     /**
      * @Route("/settings/newsletter", name="settings_newsletter", methods="GET|POST")
      */
-    public function newsletter(Request $request, AppServices $services, TranslatorInterface $translator) {
+    public function newsletter(Request $request, AppServices $services, TranslatorInterface $translator)
+    {
 
         $form = $this->createFormBuilder()
-                ->add('newsletter_enabled', ChoiceType::class, [
-                    'required' => true,
-                    'multiple' => false,
-                    'expanded' => true,
-                    'label' => 'Enable newsletter',
-                    'choices' => ['Yes' => 'yes', 'No' => 'no'],
-                    'label_attr' => ['class' => 'radio-custom radio-inline'],
-                    'help' => 'SSL must be activated on your hosting server in order to use Mailchimp',
-                    'constraints' => array(
-                        new NotNull()
-                    ),
-                ])
-                ->add('mailchimp_api_key', TextType::class, [
-                    'required' => false,
-                    'label' => 'Mailchimp app id',
-                    'help' => 'Go to the documentation to get help about getting an api key'
-                ])
-                ->add('mailchimp_list_id', TextType::class, [
-                    'required' => false,
-                    'label' => 'Mailchimp list id',
-                    'help' => 'Go to the documentation to get help about getting a list id'
-                ])
-                ->add('save', SubmitType::class, [
-                    'label' => 'Save',
-                    'attr' => ['class' => 'btn btn-primary'],
-                ])
-                ->getForm();
+            ->add('newsletter_enabled', ChoiceType::class, [
+                'required' => true,
+                'multiple' => false,
+                'expanded' => true,
+                'label' => 'Enable newsletter',
+                'choices' => ['Yes' => 'yes', 'No' => 'no'],
+                'label_attr' => ['class' => 'radio-custom radio-inline'],
+                'help' => 'SSL must be activated on your hosting server in order to use Mailchimp',
+                'constraints' => array(
+                    new NotNull()
+                ),
+            ])
+            ->add('mailchimp_api_key', TextType::class, [
+                'required' => false,
+                'label' => 'Mailchimp app id',
+                'help' => 'Go to the documentation to get help about getting an api key'
+            ])
+            ->add('mailchimp_list_id', TextType::class, [
+                'required' => false,
+                'label' => 'Mailchimp list id',
+                'help' => 'Go to the documentation to get help about getting a list id'
+            ])
+            ->add('save', SubmitType::class, [
+                'label' => 'Save',
+                'attr' => ['class' => 'btn btn-primary'],
+            ])
+            ->getForm();
 
         $form->handleRequest($request);
 
@@ -297,14 +307,15 @@ class SettingsController extends Controller {
         }
 
         return $this->render('Dashboard/Administrator/Settings/newsletter.html.twig', [
-                    'form' => $form->createView()
+            'form' => $form->createView()
         ]);
     }
 
     /**
      * @Route("/settings/homepage-hero", name="settings_homepage", methods="GET|POST")
      */
-    public function homepagehero(Request $request, AppServices $services, TranslatorInterface $translator) {
+    public function homepagehero(Request $request, AppServices $services, TranslatorInterface $translator)
+    {
 
         $em = $this->getDoctrine()->getManager();
         $homepageherosettings = $em->getRepository("App\Entity\HomepageHeroSettings")->find(1);
@@ -364,14 +375,15 @@ class SettingsController extends Controller {
         }
 
         return $this->render('Dashboard/Administrator/Settings/homepage.html.twig', [
-                    'form' => $form->createView()
+            'form' => $form->createView()
         ]);
     }
 
     /**
      * @Route("/settings/layout", name="settings_layout", methods="GET|POST")
      */
-    public function layout(Request $request, AppServices $services, TranslatorInterface $translator) {
+    public function layout(Request $request, AppServices $services, TranslatorInterface $translator)
+    {
 
         $em = $this->getDoctrine()->getManager();
 
@@ -387,10 +399,10 @@ class SettingsController extends Controller {
 
             $settings = $request->request->all()['app_layout_settings'];
             if (!array_key_exists('app_locales', $settings)) {
-                $form->get('app_locales')->addError(new \Symfony\Component\Form\FormError($translator->trans('You must specify at least one language')));
+                $form->get('app_locales')->addError(new FormError($translator->trans('You must specify at least one language')));
             } else {
                 if (!in_array($settings['default_locale'], $settings['app_locales'])) {
-                    $form->get('default_locale')->addError(new \Symfony\Component\Form\FormError($translator->trans('The default locale must be selected in the available languages')));
+                    $form->get('default_locale')->addError(new FormError($translator->trans('The default locale must be selected in the available languages')));
                 }
             }
 
@@ -518,114 +530,115 @@ class SettingsController extends Controller {
         }
 
         return $this->render('Dashboard/Administrator/Settings/layout.html.twig', [
-                    'form' => $form->createView()
+            'form' => $form->createView()
         ]);
     }
 
     /**
      * @Route("/settings/events-list-page", name="settings_events_list_page", methods="GET|POST")
      */
-    public function eventsListPage(Request $request, AppServices $services, TranslatorInterface $translator) {
+    public function eventsListPage(Request $request, AppServices $services, TranslatorInterface $translator)
+    {
 
         $form = $this->createFormBuilder()
-                ->add('events_per_page', TextType::class, [
-                    'required' => true,
-                    'label' => 'Number of events per page',
-                    'attr' => ['class' => 'touchspin-integer']
-                ])
-                ->add('show_map_button', ChoiceType::class, [
-                    'required' => true,
-                    'multiple' => false,
-                    'expanded' => true,
-                    'label' => 'Show map button',
-                    'choices' => ['Yes' => 'yes', 'No' => 'no'],
-                    'label_attr' => ['class' => 'radio-custom radio-inline'],
-                    'constraints' => array(
-                        new NotNull()
-                    ),
-                ])
-                ->add('show_calendar_button', ChoiceType::class, [
-                    'required' => true,
-                    'multiple' => false,
-                    'expanded' => true,
-                    'label' => 'Show calendar button',
-                    'choices' => ['Yes' => 'yes', 'No' => 'no'],
-                    'label_attr' => ['class' => 'radio-custom radio-inline'],
-                    'constraints' => array(
-                        new NotNull()
-                    ),
-                ])
-                ->add('show_rss_feed_button', ChoiceType::class, [
-                    'required' => true,
-                    'multiple' => false,
-                    'expanded' => true,
-                    'label' => 'Show RSS feed button',
-                    'choices' => ['Yes' => 'yes', 'No' => 'no'],
-                    'label_attr' => ['class' => 'radio-custom radio-inline'],
-                    'constraints' => array(
-                        new NotNull()
-                    ),
-                ])
-                ->add('show_category_filter', ChoiceType::class, [
-                    'required' => true,
-                    'multiple' => false,
-                    'expanded' => true,
-                    'label' => 'Show category filter',
-                    'choices' => ['Yes' => 'yes', 'No' => 'no'],
-                    'label_attr' => ['class' => 'radio-custom radio-inline'],
-                    'constraints' => array(
-                        new NotNull()
-                    ),
-                ])
-                ->add('show_location_filter', ChoiceType::class, [
-                    'required' => true,
-                    'multiple' => false,
-                    'expanded' => true,
-                    'label' => 'Show location filter',
-                    'choices' => ['Yes' => 'yes', 'No' => 'no'],
-                    'label_attr' => ['class' => 'radio-custom radio-inline'],
-                    'constraints' => array(
-                        new NotNull()
-                    ),
-                ])
-                ->add('show_date_filter', ChoiceType::class, [
-                    'required' => true,
-                    'multiple' => false,
-                    'expanded' => true,
-                    'label' => 'Show date filter',
-                    'choices' => ['Yes' => 'yes', 'No' => 'no'],
-                    'label_attr' => ['class' => 'radio-custom radio-inline'],
-                    'constraints' => array(
-                        new NotNull()
-                    ),
-                ])
-                ->add('show_ticket_price_filter', ChoiceType::class, [
-                    'required' => true,
-                    'multiple' => false,
-                    'expanded' => true,
-                    'label' => 'Show ticket price filter',
-                    'choices' => ['Yes' => 'yes', 'No' => 'no'],
-                    'label_attr' => ['class' => 'radio-custom radio-inline'],
-                    'constraints' => array(
-                        new NotNull()
-                    ),
-                ])
-                ->add('show_audience_filter', ChoiceType::class, [
-                    'required' => true,
-                    'multiple' => false,
-                    'expanded' => true,
-                    'label' => 'Show audience filter',
-                    'choices' => ['Yes' => 'yes', 'No' => 'no'],
-                    'label_attr' => ['class' => 'radio-custom radio-inline'],
-                    'constraints' => array(
-                        new NotNull()
-                    ),
-                ])
-                ->add('save', SubmitType::class, [
-                    'label' => 'Save',
-                    'attr' => ['class' => 'btn btn-primary'],
-                ])
-                ->getForm();
+            ->add('events_per_page', TextType::class, [
+                'required' => true,
+                'label' => 'Number of events per page',
+                'attr' => ['class' => 'touchspin-integer']
+            ])
+            ->add('show_map_button', ChoiceType::class, [
+                'required' => true,
+                'multiple' => false,
+                'expanded' => true,
+                'label' => 'Show map button',
+                'choices' => ['Yes' => 'yes', 'No' => 'no'],
+                'label_attr' => ['class' => 'radio-custom radio-inline'],
+                'constraints' => array(
+                    new NotNull()
+                ),
+            ])
+            ->add('show_calendar_button', ChoiceType::class, [
+                'required' => true,
+                'multiple' => false,
+                'expanded' => true,
+                'label' => 'Show calendar button',
+                'choices' => ['Yes' => 'yes', 'No' => 'no'],
+                'label_attr' => ['class' => 'radio-custom radio-inline'],
+                'constraints' => array(
+                    new NotNull()
+                ),
+            ])
+            ->add('show_rss_feed_button', ChoiceType::class, [
+                'required' => true,
+                'multiple' => false,
+                'expanded' => true,
+                'label' => 'Show RSS feed button',
+                'choices' => ['Yes' => 'yes', 'No' => 'no'],
+                'label_attr' => ['class' => 'radio-custom radio-inline'],
+                'constraints' => array(
+                    new NotNull()
+                ),
+            ])
+            ->add('show_category_filter', ChoiceType::class, [
+                'required' => true,
+                'multiple' => false,
+                'expanded' => true,
+                'label' => 'Show category filter',
+                'choices' => ['Yes' => 'yes', 'No' => 'no'],
+                'label_attr' => ['class' => 'radio-custom radio-inline'],
+                'constraints' => array(
+                    new NotNull()
+                ),
+            ])
+            ->add('show_location_filter', ChoiceType::class, [
+                'required' => true,
+                'multiple' => false,
+                'expanded' => true,
+                'label' => 'Show location filter',
+                'choices' => ['Yes' => 'yes', 'No' => 'no'],
+                'label_attr' => ['class' => 'radio-custom radio-inline'],
+                'constraints' => array(
+                    new NotNull()
+                ),
+            ])
+            ->add('show_date_filter', ChoiceType::class, [
+                'required' => true,
+                'multiple' => false,
+                'expanded' => true,
+                'label' => 'Show date filter',
+                'choices' => ['Yes' => 'yes', 'No' => 'no'],
+                'label_attr' => ['class' => 'radio-custom radio-inline'],
+                'constraints' => array(
+                    new NotNull()
+                ),
+            ])
+            ->add('show_ticket_price_filter', ChoiceType::class, [
+                'required' => true,
+                'multiple' => false,
+                'expanded' => true,
+                'label' => 'Show ticket price filter',
+                'choices' => ['Yes' => 'yes', 'No' => 'no'],
+                'label_attr' => ['class' => 'radio-custom radio-inline'],
+                'constraints' => array(
+                    new NotNull()
+                ),
+            ])
+            ->add('show_audience_filter', ChoiceType::class, [
+                'required' => true,
+                'multiple' => false,
+                'expanded' => true,
+                'label' => 'Show audience filter',
+                'choices' => ['Yes' => 'yes', 'No' => 'no'],
+                'label_attr' => ['class' => 'radio-custom radio-inline'],
+                'constraints' => array(
+                    new NotNull()
+                ),
+            ])
+            ->add('save', SubmitType::class, [
+                'label' => 'Save',
+                'attr' => ['class' => 'btn btn-primary'],
+            ])
+            ->getForm();
 
         $form->handleRequest($request);
 
@@ -658,43 +671,44 @@ class SettingsController extends Controller {
         }
 
         return $this->render('Dashboard/Administrator/Settings/events-list-page.html.twig', [
-                    'form' => $form->createView()
+            'form' => $form->createView()
         ]);
     }
 
     /**
      * @Route("/settings/venue-page", name="settings_venue_page", methods="GET|POST")
      */
-    public function venuePage(Request $request, AppServices $services, TranslatorInterface $translator) {
+    public function venuePage(Request $request, AppServices $services, TranslatorInterface $translator)
+    {
 
         $form = $this->createFormBuilder()
-                ->add('venue_comments_enabled', ChoiceType::class, [
-                    'required' => true,
-                    'multiple' => false,
-                    'expanded' => true,
-                    'label' => 'Enable comments',
-                    //'choices' => ['No' => 'no', 'Native comments' => 'native', 'Facebook comments' => 'facebook', 'Disqus comments' => 'disqus'],
-                    'choices' => ['No' => 'no', 'Facebook comments' => 'facebook', 'Disqus comments' => 'disqus'],
-                    'label_attr' => ['class' => 'radio-custom radio-inline'],
-                    'constraints' => array(
-                        new NotNull()
-                    ),
-                ])
-                ->add('facebook_app_id', TextType::class, [
-                    'required' => false,
-                    'label' => 'Facebook app id',
-                    'help' => 'Go to the documentation to get help about getting an app ID'
-                ])
-                ->add('disqus_subdomain', TextType::class, [
-                    'required' => false,
-                    'label' => 'Disqus subdomain',
-                    'help' => 'Go to the documentation to get help about setting up Disqus'
-                ])
-                ->add('save', SubmitType::class, [
-                    'label' => 'Save',
-                    'attr' => ['class' => 'btn btn-primary'],
-                ])
-                ->getForm();
+            ->add('venue_comments_enabled', ChoiceType::class, [
+                'required' => true,
+                'multiple' => false,
+                'expanded' => true,
+                'label' => 'Enable comments',
+                //'choices' => ['No' => 'no', 'Native comments' => 'native', 'Facebook comments' => 'facebook', 'Disqus comments' => 'disqus'],
+                'choices' => ['No' => 'no', 'Facebook comments' => 'facebook', 'Disqus comments' => 'disqus'],
+                'label_attr' => ['class' => 'radio-custom radio-inline'],
+                'constraints' => array(
+                    new NotNull()
+                ),
+            ])
+            ->add('facebook_app_id', TextType::class, [
+                'required' => false,
+                'label' => 'Facebook app id',
+                'help' => 'Go to the documentation to get help about getting an app ID'
+            ])
+            ->add('disqus_subdomain', TextType::class, [
+                'required' => false,
+                'label' => 'Disqus subdomain',
+                'help' => 'Go to the documentation to get help about setting up Disqus'
+            ])
+            ->add('save', SubmitType::class, [
+                'label' => 'Save',
+                'attr' => ['class' => 'btn btn-primary'],
+            ])
+            ->getForm();
 
         $form->handleRequest($request);
 
@@ -715,48 +729,49 @@ class SettingsController extends Controller {
         }
 
         return $this->render('Dashboard/Administrator/Settings/venue.html.twig', [
-                    'form' => $form->createView()
+            'form' => $form->createView()
         ]);
     }
 
     /**
      * @Route("/settings/blog", name="settings_blog", methods="GET|POST")
      */
-    public function blog(Request $request, AppServices $services, TranslatorInterface $translator) {
+    public function blog(Request $request, AppServices $services, TranslatorInterface $translator)
+    {
 
         $form = $this->createFormBuilder()
-                ->add('blog_posts_per_page', TextType::class, [
-                    'required' => true,
-                    'label' => 'Number of blog posts per page',
-                    'attr' => ['class' => 'touchspin-integer']
-                ])
-                ->add('blog_comments_enabled', ChoiceType::class, [
-                    'required' => true,
-                    'multiple' => false,
-                    'expanded' => true,
-                    'label' => 'Enable comments',
-                    //'choices' => ['No' => 'no', 'Native comments' => 'native', 'Facebook comments' => 'facebook', 'Disqus comments' => 'disqus'],
-                    'choices' => ['No' => 'no', 'Facebook comments' => 'facebook', 'Disqus comments' => 'disqus'],
-                    'label_attr' => ['class' => 'radio-custom radio-inline'],
-                    'constraints' => array(
-                        new NotNull()
-                    ),
-                ])
-                ->add('facebook_app_id', TextType::class, [
-                    'required' => false,
-                    'label' => 'Facebook app id',
-                    'help' => 'Go to the documentation to get help about getting an app ID'
-                ])
-                ->add('disqus_subdomain', TextType::class, [
-                    'required' => false,
-                    'label' => 'Disqus subdomain',
-                    'help' => 'Go to the documentation to get help about setting up Disqus'
-                ])
-                ->add('save', SubmitType::class, [
-                    'label' => 'Save',
-                    'attr' => ['class' => 'btn btn-primary'],
-                ])
-                ->getForm();
+            ->add('blog_posts_per_page', TextType::class, [
+                'required' => true,
+                'label' => 'Number of blog posts per page',
+                'attr' => ['class' => 'touchspin-integer']
+            ])
+            ->add('blog_comments_enabled', ChoiceType::class, [
+                'required' => true,
+                'multiple' => false,
+                'expanded' => true,
+                'label' => 'Enable comments',
+                //'choices' => ['No' => 'no', 'Native comments' => 'native', 'Facebook comments' => 'facebook', 'Disqus comments' => 'disqus'],
+                'choices' => ['No' => 'no', 'Facebook comments' => 'facebook', 'Disqus comments' => 'disqus'],
+                'label_attr' => ['class' => 'radio-custom radio-inline'],
+                'constraints' => array(
+                    new NotNull()
+                ),
+            ])
+            ->add('facebook_app_id', TextType::class, [
+                'required' => false,
+                'label' => 'Facebook app id',
+                'help' => 'Go to the documentation to get help about getting an app ID'
+            ])
+            ->add('disqus_subdomain', TextType::class, [
+                'required' => false,
+                'label' => 'Disqus subdomain',
+                'help' => 'Go to the documentation to get help about setting up Disqus'
+            ])
+            ->add('save', SubmitType::class, [
+                'label' => 'Save',
+                'attr' => ['class' => 'btn btn-primary'],
+            ])
+            ->getForm();
 
         $form->handleRequest($request);
 
@@ -779,14 +794,15 @@ class SettingsController extends Controller {
         }
 
         return $this->render('Dashboard/Administrator/Settings/blog.html.twig', [
-                    'form' => $form->createView()
+            'form' => $form->createView()
         ]);
     }
 
     /**
      * @Route("/settings/mail-server", name="settings_mail_server", methods="GET|POST")
      */
-    public function mailServer(Request $request, AppServices $services, TranslatorInterface $translator) {
+    public function mailServer(Request $request, AppServices $services, TranslatorInterface $translator)
+    {
 
         if ($services->getEnv("DEMO_MODE") == "1") {
             $this->addFlash('error', $translator->trans('This feature is disabled in demo mode', [], 'javascript'));
@@ -794,75 +810,75 @@ class SettingsController extends Controller {
         }
 
         $form = $this->createFormBuilder()
-                ->add('mail_server_transport', ChoiceType::class, [
-                    'required' => true,
-                    'multiple' => false,
-                    'expanded' => true,
-                    'label' => 'Transport',
-                    'choices' => ['SMTP' => 'smtp', 'Gmail' => 'gmail', 'Sendmail' => 'sendmail'],
-                    'label_attr' => ['class' => 'radio-custom radio-inline'],
-                    'constraints' => array(
-                        new NotNull()
-                    ),
-                ])
-                ->add('mail_server_host', TextType::class, [
-                    'required' => true,
-                    'label' => 'Host',
-                    'constraints' => array(
-                        new NotBlank()
-                    ),
-                ])
-                ->add('mail_server_port', TextType::class, [
-                    'required' => false,
-                    'label' => 'Port',
-                ])
-                ->add('mail_server_encryption', ChoiceType::class, [
-                    'required' => true,
-                    'multiple' => false,
-                    'expanded' => true,
-                    'label' => 'Encryption',
-                    'choices' => ['None' => null, 'SSL' => 'ssl', 'TLS' => 'tls'],
-                    'label_attr' => ['class' => 'radio-custom radio-inline'],
-                ])
-                /* ->add('mail_server_auth_mode', ChoiceType::class, [
-                  'required' => true,
-                  'multiple' => false,
-                  'expanded' => true,
-                  'label' => 'Authentication mode',
-                  'choices' => ['None' => null, 'Login' => 'login', 'Cram-md5' => 'cram-md5', 'Plain' => 'plain'],
-                  'label_attr' => ['class' => 'radio-custom radio-inline'],
-                  ]) */
-                ->add('mail_server_username', TextType::class, [
-                    'required' => false,
-                    'label' => 'Username',
-                ])
-                ->add('mail_server_password', TextType::class, [
-                    'required' => false,
-                    'label' => 'Password',
-                ])
-                ->add('no_reply_email', TextType::class, [
-                    'purify_html' => true,
-                    'required' => true,
-                    'label' => 'No reply email address',
-                    'constraints' => array(
-                        new NotBlank()
-                    ),
-                    'help' => 'This email address will be used as the sender of all the emails sent by the platform, in almost all cases, it is the same as the username above'
-                ])
-                ->add('contact_email', TextType::class, [
-                    'purify_html' => true,
-                    'required' => true,
-                    'label' => 'Contact email',
-                    'constraints' => array(
-                        new NotBlank()
-                    ),
-                    'help' => 'This email address will receive the contact form messages'
-                ])
-                ->add('save', SubmitType::class, [
-                    'label' => 'Save',
-                    'attr' => ['class' => 'btn btn-primary'],
-                ])
-                ->getForm();
+            ->add('mail_server_transport', ChoiceType::class, [
+                'required' => true,
+                'multiple' => false,
+                'expanded' => true,
+                'label' => 'Transport',
+                'choices' => ['SMTP' => 'smtp', 'Gmail' => 'gmail', 'Sendmail' => 'sendmail'],
+                'label_attr' => ['class' => 'radio-custom radio-inline'],
+                'constraints' => array(
+                    new NotNull()
+                ),
+            ])
+            ->add('mail_server_host', TextType::class, [
+                'required' => true,
+                'label' => 'Host',
+                'constraints' => array(
+                    new NotBlank()
+                ),
+            ])
+            ->add('mail_server_port', TextType::class, [
+                'required' => false,
+                'label' => 'Port',
+            ])
+            ->add('mail_server_encryption', ChoiceType::class, [
+                'required' => true,
+                'multiple' => false,
+                'expanded' => true,
+                'label' => 'Encryption',
+                'choices' => ['None' => null, 'SSL' => 'ssl', 'TLS' => 'tls'],
+                'label_attr' => ['class' => 'radio-custom radio-inline'],
+            ])
+            /* ->add('mail_server_auth_mode', ChoiceType::class, [
+              'required' => true,
+              'multiple' => false,
+              'expanded' => true,
+              'label' => 'Authentication mode',
+              'choices' => ['None' => null, 'Login' => 'login', 'Cram-md5' => 'cram-md5', 'Plain' => 'plain'],
+              'label_attr' => ['class' => 'radio-custom radio-inline'],
+              ]) */
+            ->add('mail_server_username', TextType::class, [
+                'required' => false,
+                'label' => 'Username',
+            ])
+            ->add('mail_server_password', TextType::class, [
+                'required' => false,
+                'label' => 'Password',
+            ])
+            ->add('no_reply_email', TextType::class, [
+                'purify_html' => true,
+                'required' => true,
+                'label' => 'No reply email address',
+                'constraints' => array(
+                    new NotBlank()
+                ),
+                'help' => 'This email address will be used as the sender of all the emails sent by the platform, in almost all cases, it is the same as the username above'
+            ])
+            ->add('contact_email', TextType::class, [
+                'purify_html' => true,
+                'required' => true,
+                'label' => 'Contact email',
+                'constraints' => array(
+                    new NotBlank()
+                ),
+                'help' => 'This email address will receive the contact form messages'
+            ])
+            ->add('save', SubmitType::class, [
+                'label' => 'Save',
+                'attr' => ['class' => 'btn btn-primary'],
+            ])
+            ->getForm();
 
         $form->handleRequest($request);
 
@@ -921,19 +937,20 @@ class SettingsController extends Controller {
         }
 
         return $this->render('Dashboard/Administrator/Settings/mail-server.html.twig', [
-                    'form' => $form->createView()
+            'form' => $form->createView()
         ]);
     }
 
     /**
      * @Route("/settings/mail-server/test", name="settings_mail_server_test", methods="GET|POST")
      */
-    public function mailServerTest(Request $request, AppServices $services, \Swift_Mailer $mailer, \Twig_Environment $templating, TranslatorInterface $translator) {
+    public function mailServerTest(Request $request, AppServices $services, Swift_Mailer $mailer, Twig_Environment $templating, TranslatorInterface $translator)
+    {
 
-        $email = new \Swift_Message($translator->trans("Mail server test email"));
+        $email = new Swift_Message($translator->trans("Mail server test email"));
         $email->setFrom($services->getSetting('no_reply_email'), $services->getSetting('website_name'))
-                ->setTo($request->query->get('email'))
-                ->setBody($templating->render('Dashboard/Administrator/Settings/mail-server-test-email.html.twig'), 'text/html');
+            ->setTo($request->query->get('email'))
+            ->setBody($templating->render('Dashboard/Administrator/Settings/mail-server-test-email.html.twig'), 'text/html');
         try {
             $result = $mailer->send($email);
             if ($result == 0) {
@@ -941,7 +958,7 @@ class SettingsController extends Controller {
             } else {
                 $this->addFlash('success', $translator->trans("The test email has been sent, please check the inbox of") . " " . $request->query->get('email'));
             }
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $this->addFlash('danger', $translator->trans("The email could not be sent"));
         }
         return $this->redirectToRoute('dashboard_administrator_settings_mail_server');
@@ -950,33 +967,34 @@ class SettingsController extends Controller {
     /**
      * @Route("/settings/google-recaptcha", name="settings_google_recaptcha", methods="GET|POST")
      */
-    public function googleRecaptcha(Request $request, AppServices $services, TranslatorInterface $translator) {
+    public function googleRecaptcha(Request $request, AppServices $services, TranslatorInterface $translator)
+    {
 
         $form = $this->createFormBuilder()
-                ->add('google_recaptcha_enabled', ChoiceType::class, [
-                    'required' => true,
-                    'multiple' => false,
-                    'expanded' => true,
-                    'label' => 'Enable Google Repatcha',
-                    'choices' => ['Yes' => 'yes', 'No' => 'no'],
-                    'label_attr' => ['class' => 'radio-custom radio-inline'],
-                    'constraints' => array(
-                        new NotNull()
-                    ),
-                ])
-                ->add('google_recaptcha_site_key', TextType::class, [
-                    'required' => false,
-                    'label' => 'Site key',
-                ])
-                ->add('google_recaptcha_secret_key', TextType::class, [
-                    'required' => false,
-                    'label' => 'Secret key',
-                ])
-                ->add('save', SubmitType::class, [
-                    'label' => 'Save',
-                    'attr' => ['class' => 'btn btn-primary'],
-                ])
-                ->getForm();
+            ->add('google_recaptcha_enabled', ChoiceType::class, [
+                'required' => true,
+                'multiple' => false,
+                'expanded' => true,
+                'label' => 'Enable Google Repatcha',
+                'choices' => ['Yes' => 'yes', 'No' => 'no'],
+                'label_attr' => ['class' => 'radio-custom radio-inline'],
+                'constraints' => array(
+                    new NotNull()
+                ),
+            ])
+            ->add('google_recaptcha_site_key', TextType::class, [
+                'required' => false,
+                'label' => 'Site key',
+            ])
+            ->add('google_recaptcha_secret_key', TextType::class, [
+                'required' => false,
+                'label' => 'Secret key',
+            ])
+            ->add('save', SubmitType::class, [
+                'label' => 'Save',
+                'attr' => ['class' => 'btn btn-primary'],
+            ])
+            ->getForm();
 
         $form->handleRequest($request);
 
@@ -1001,26 +1019,27 @@ class SettingsController extends Controller {
         }
 
         return $this->render('Dashboard/Administrator/Settings/google-recaptcha.html.twig', [
-                    'form' => $form->createView()
+            'form' => $form->createView()
         ]);
     }
 
     /**
      * @Route("/settings/google-maps", name="settings_google_maps", methods="GET|POST")
      */
-    public function googleMaps(Request $request, AppServices $services, TranslatorInterface $translator) {
+    public function googleMaps(Request $request, AppServices $services, TranslatorInterface $translator)
+    {
 
         $form = $this->createFormBuilder()
-                ->add('google_maps_api_key', TextType::class, [
-                    'required' => false,
-                    'label' => 'Google Maps Api Key',
-                    'help' => 'Leave api key empty to disable google maps project wide'
-                ])
-                ->add('save', SubmitType::class, [
-                    'label' => 'Save',
-                    'attr' => ['class' => 'btn btn-primary'],
-                ])
-                ->getForm();
+            ->add('google_maps_api_key', TextType::class, [
+                'required' => false,
+                'label' => 'Google Maps Api Key',
+                'help' => 'Leave api key empty to disable google maps project wide'
+            ])
+            ->add('save', SubmitType::class, [
+                'label' => 'Save',
+                'attr' => ['class' => 'btn btn-primary'],
+            ])
+            ->getForm();
 
         $form->handleRequest($request);
 
@@ -1038,59 +1057,60 @@ class SettingsController extends Controller {
         }
 
         return $this->render('Dashboard/Administrator/Settings/google-maps.html.twig', [
-                    'form' => $form->createView()
+            'form' => $form->createView()
         ]);
     }
 
     /**
      * @Route("/settings/social-login", name="settings_social_login", methods="GET|POST")
      */
-    public function socialLogin(Request $request, AppServices $services, TranslatorInterface $translator) {
+    public function socialLogin(Request $request, AppServices $services, TranslatorInterface $translator)
+    {
 
         $form = $this->createFormBuilder()
-                ->add('social_login_facebook_enabled', ChoiceType::class, [
-                    'required' => true,
-                    'multiple' => false,
-                    'expanded' => true,
-                    'label' => 'Enable Facebook Social Login',
-                    'choices' => ['Yes' => 'yes', 'No' => 'no'],
-                    'label_attr' => ['class' => 'radio-custom radio-inline'],
-                    'constraints' => array(
-                        new NotNull()
-                    ),
-                ])
-                ->add('social_login_facebook_id', TextType::class, [
-                    'required' => false,
-                    'label' => 'Facebook Id',
-                ])
-                ->add('social_login_facebook_secret', TextType::class, [
-                    'required' => false,
-                    'label' => 'Facebook Secret',
-                ])
-                ->add('social_login_google_enabled', ChoiceType::class, [
-                    'required' => true,
-                    'multiple' => false,
-                    'expanded' => true,
-                    'label' => 'Enable Google Social Login',
-                    'choices' => ['Yes' => 'yes', 'No' => 'no'],
-                    'label_attr' => ['class' => 'radio-custom radio-inline'],
-                    'constraints' => array(
-                        new NotNull()
-                    ),
-                ])
-                ->add('social_login_google_id', TextType::class, [
-                    'required' => false,
-                    'label' => 'Google Id',
-                ])
-                ->add('social_login_google_secret', TextType::class, [
-                    'required' => false,
-                    'label' => 'Google Secret',
-                ])
-                ->add('save', SubmitType::class, [
-                    'label' => 'Save',
-                    'attr' => ['class' => 'btn btn-primary'],
-                ])
-                ->getForm();
+            ->add('social_login_facebook_enabled', ChoiceType::class, [
+                'required' => true,
+                'multiple' => false,
+                'expanded' => true,
+                'label' => 'Enable Facebook Social Login',
+                'choices' => ['Yes' => 'yes', 'No' => 'no'],
+                'label_attr' => ['class' => 'radio-custom radio-inline'],
+                'constraints' => array(
+                    new NotNull()
+                ),
+            ])
+            ->add('social_login_facebook_id', TextType::class, [
+                'required' => false,
+                'label' => 'Facebook Id',
+            ])
+            ->add('social_login_facebook_secret', TextType::class, [
+                'required' => false,
+                'label' => 'Facebook Secret',
+            ])
+            ->add('social_login_google_enabled', ChoiceType::class, [
+                'required' => true,
+                'multiple' => false,
+                'expanded' => true,
+                'label' => 'Enable Google Social Login',
+                'choices' => ['Yes' => 'yes', 'No' => 'no'],
+                'label_attr' => ['class' => 'radio-custom radio-inline'],
+                'constraints' => array(
+                    new NotNull()
+                ),
+            ])
+            ->add('social_login_google_id', TextType::class, [
+                'required' => false,
+                'label' => 'Google Id',
+            ])
+            ->add('social_login_google_secret', TextType::class, [
+                'required' => false,
+                'label' => 'Google Secret',
+            ])
+            ->add('save', SubmitType::class, [
+                'label' => 'Save',
+                'attr' => ['class' => 'btn btn-primary'],
+            ])
+            ->getForm();
 
         $form->handleRequest($request);
 
@@ -1123,26 +1143,28 @@ class SettingsController extends Controller {
         }
 
         return $this->render('Dashboard/Administrator/Settings/social-login.html.twig', [
-                    'form' => $form->createView()
+            'form' => $form->createView()
         ]);
     }
 
     /**
      * @Route("/settings/menus", name="settings_menus", methods="GET")
      */
-    public function menus(Request $request, AppServices $services, TranslatorInterface $translator) {
+    public function menus(Request $request, AppServices $services, TranslatorInterface $translator)
+    {
 
         $menus = $services->getMenus(array())->getQuery()->getResult();
 
         return $this->render('Dashboard/Administrator/Settings/menus.html.twig', [
-                    'menus' => $menus
+            'menus' => $menus
         ]);
     }
 
     /**
      * @Route("/settings/menus/{slug}/edit", name="settings_menus_edit", methods="GET|POST")
      */
-    public function menuEdit(Request $request, AppServices $services, TranslatorInterface $translator, $slug) {
+    public function menuEdit(Request $request, AppServices $services, TranslatorInterface $translator, $slug)
+    {
 
         $em = $this->getDoctrine()->getManager();
 
@@ -1171,8 +1193,8 @@ class SettingsController extends Controller {
         }
 
         return $this->render('Dashboard/Administrator/Settings/menu-edit.html.twig', [
-                    'menu' => $menu,
-                    'form' => $form->createView()
+            'menu' => $menu,
+            'form' => $form->createView()
         ]);
     }
 }
