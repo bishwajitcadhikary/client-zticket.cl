@@ -6,35 +6,125 @@
 
 {% if event.id %}{% set pagetitle = 'Update the event' | trans %}{% endif %}
 
-{% block title %}{{pagetitle}}{% endblock %}
+{% block title %}{{ pagetitle }}{% endblock %}
 
 {% block content %}
 
     {% set navigation = [{ "dashboard_index": ('Dashboard' | trans),  "dashboard_organizer_event": ('My events' | trans), "current":(pagetitle) }] %}
     {% include "Global/navigation.html.twig" with navigation %}
 
-    <section class="section-content padding-y bg-white {{ "event_add" in app.request.get("_route") ? "add-event" : "edit-event" }}">
+    <section
+            class="section-content padding-y bg-white {{ "event_add" in app.request.get("_route") ? "add-event" : "edit-event" }}">
         <div class="{{ services.getSetting("app_layout") }}">
             <div class="row">
                 <aside class="col-lg-3 pt-3 pt-lg-0">
                     {% include "Dashboard/sidebar.html.twig" %}
                 </aside>
                 <div class="col-lg-9 mt-4 mt-lg-0">
-                    <div class="card box">
-                        <div class="card-body">
-                            {% include "Global/message.html.twig" with { type: "info", icon: "fas fa-info-circle", message: ("The fields preceded with a red * are mandatory"|trans) } %}
-                            {{ form_start(form, {'attr': {'novalidate': 'novalidate'}}) }}
-                            {{ form_widget(form) }}
-                            {{ form_end(form) }}
+                    {#                            {% include "Global/message.html.twig" with { type: "info", icon: "fas fa-info-circle", message: ("The fields preceded with a red * are mandatory"|trans) } %}#}
+                    {#                            {{ form_start(form, {'attr': {'novalidate': 'novalidate'}}) }}#}
+                    {#                            {{ form_widget(form) }}#}
+                    {#                            {{ form_end(form) }}#}
+
+
+                    {{ form_start(form, {'attr': {'novalidate': 'novalidate'}}) }}
+                    <div class="accordion" id="event-accordion">
+                        <div class="card mb-3">
+                            <div class="card-header" id="event-info-heading" data-toggle="collapse" data-target="#event-info-collapse" aria-expanded="true" aria-controls="event-info-collapse">
+                                <h5 class="mb-0">
+                                    Event Information
+                                </h5>
+                            </div>
+
+                            <div id="event-info-collapse" class="collapse show" aria-labelledby="event-info-heading" data-parent="#event-accordion">
+                                <div class="card-body">
+                                    {{ form_row(form.translations) }}
+
+                                    {{ form_row(form.category) }}
+                                    {{ form_row(form.year) }}
+                                    {{ form_row(form.eventdates) }}
+                                </div>
+                            </div>
                         </div>
+
+                        <div class="card mb-3">
+                            <div class="card-header" id="event-options-heading" data-toggle="collapse" data-target="#event-options-collapse" aria-expanded="false" aria-controls="event-options-collapse">
+                                <h5 class="mb-0">
+                                    Event Options
+                                </h5>
+                            </div>
+                            <div id="event-options-collapse" class="collapse" aria-labelledby="event-options-heading" data-parent="#event-accordion">
+                                <div class="card-body">
+                                    {{ form_row(form.audiences) }}
+                                    {{ form_row(form.languages) }}
+                                    {{ form_row(form.subtitles) }}
+                                    {{ form_row(form.artists) }}
+                                    {{ form_row(form.tags) }}
+                                    {{ form_row(form.showattendees) }}
+                                    {{ form_row(form.enablereviews) }}
+                                    {{ form_row(form.country) }}
+                                    {{ form_row(form.externallink) }}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="card mb-3">
+                            <div class="card-header" id="event-contact-heading" data-toggle="collapse" data-target="#event-contact-collapse" aria-expanded="false" aria-controls="event-contact-collapse">
+                                <h5 class="mb-0">
+                                    Contact Information
+                                </h5>
+                            </div>
+                            <div id="event-contact-collapse" class="collapse" aria-labelledby="event-contact-heading" data-parent="#event-information">
+                                <div class="card-body">
+                                    {{ form_row(form.phonenumber) }}
+                                    {{ form_row(form.email) }}
+                                    {{ form_row(form.twitter) }}
+                                    {{ form_row(form.instagram) }}
+                                    {{ form_row(form.facebook) }}
+                                    {{ form_row(form.googleplus) }}
+                                    {{ form_row(form.linkedin) }}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="card mb-3">
+                            <div class="card-header" id="event-gallery-heading" data-toggle="collapse" data-target="#event-gallery-collapse" aria-expanded="false" aria-controls="event-gallery-collapse">
+                                <h5 class="mb-0">
+                                    Images & Videos
+                                </h5>
+                            </div>
+                            <div id="event-gallery-collapse" class="collapse" aria-labelledby="event-gallery-heading" data-parent="#event-information">
+                                <div class="card-body">
+                                    {{ form_row(form.imageFile) }}
+                                    {{ form_row(form.images) }}
+                                    {{ form_row(form.youtubeurl) }}
+                                </div>
+                            </div>
+                        </div>
+
+                        {#                        <div class="card mb-3">#}
+                        {#                            <div class="card-header" id="event-dates-heading" data-toggle="collapse" data-target="#event-dates-collapse" aria-expanded="false" aria-controls="event-dates-collapse">#}
+                        {#                                <h5 class="mb-0">#}
+                        {#                                    Event Dates#}
+                        {#                                </h5>#}
+                        {#                            </div>#}
+                        {#                            <div id="event-dates-collapse" class="collapse" aria-labelledby="event-dates-heading" data-parent="#event-information">#}
+                        {#                                <div class="card-body">#}
+
+
+                        {#                                </div>#}
+                        {#                            </div>#}
+                        {#                        </div>#}
                     </div>
+                    {{ form_end(form) }}
                 </div>
             </div>
 
         </div>
     </section>
 
-    <div id="seating-plans-sections-seats-count" data-seating-plans-sections-seats-count="{{ seatingPlansSectionsSeatsCountArrayJson }}"></div>
+    <div id="seating-plans-sections-seats-count"
+         data-seating-plans-sections-seats-count="{{ seatingPlansSectionsSeatsCountArrayJson }}"></div>
 
 {% endblock %}
 
@@ -43,32 +133,32 @@
     <script>
         $(document).ready(function () {
 
-        {% if event.id %}
+            {% if event.id %}
             {% for eventDate in event.eventdates if eventDate.payoutRequested %}
-                $('.event-date-reference').each(function () {
-                if ($(this).val() == "{{eventDate.reference}}") {
-                $(this).closest("fieldset").prop('disabled', true);
-                        $(this).closest("fieldset").prepend('<p class="alert alert-danger alert-icon"><i class="fas fa-exclamation-circle"></i> {{ "This event date is locked because a payout request has been submitted"|trans }}</p>');
+            $('.event-date-reference').each(function () {
+                if ($(this).val() == "{{ eventDate.reference }}") {
+                    $(this).closest("fieldset").prop('disabled', true);
+                    $(this).closest("fieldset").prepend('<p class="alert alert-danger alert-icon"><i class="fas fa-exclamation-circle"></i> {{ "This event date is locked because a payout request has been submitted"|trans }}</p>');
                 }
-                });
+            });
             {% endfor %}
             {% for eventDate in event.eventdates %}
-                {% for eventDateTicket in eventDate.tickets if eventDateTicket.isOnSale and eventDateTicket.getOrderElementsQuantitySum() > 0 %}
-                            $('.event-date-ticket-reference').each(function () {
-                    if ($(this).val() == "{{eventDateTicket.reference}}") {
+            {% for eventDateTicket in eventDate.tickets if eventDateTicket.isOnSale and eventDateTicket.getOrderElementsQuantitySum() > 0 %}
+            $('.event-date-ticket-reference').each(function () {
+                if ($(this).val() == "{{ eventDateTicket.reference }}") {
                     $(this).closest("fieldset").find('.event-date-ticket-quantity').trigger("touchspin.updatesettings", {min: {{ eventDateTicket.getOrderElementsQuantitySum() }}});
-                                $(this).closest("fieldset").find('.event-date-ticket-quantity').attr("data-min", {{ eventDateTicket.getOrderElementsQuantitySum() }});
-                            }
-                        });
-                {% endfor %}
-            {% endfor %}
-        {% endif %}
-
-                $(document).on('submit', 'form[name="event"]', function () {
-                    $('form[name="event"]').find('fieldset').prop('disabled', false);
-                });
-
+                    $(this).closest("fieldset").find('.event-date-ticket-quantity').attr("data-min", {{ eventDateTicket.getOrderElementsQuantitySum() }});
+                }
             });
+            {% endfor %}
+            {% endfor %}
+            {% endif %}
+
+            $(document).on('submit', 'form[name="event"]', function () {
+                $('form[name="event"]').find('fieldset').prop('disabled', false);
+            });
+
+        });
     </script>
 
 {% endblock %}
