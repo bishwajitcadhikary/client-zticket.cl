@@ -1,11 +1,16 @@
 .idea
 .env
-vendor
 
+public/media/*
 
 var/cache/prod/*
 var/cache/dev/*
 
+sessions/dev
+sessions/prod
+
 
 var/log/*
 !var/log/.gitkeep
+
+vendor
