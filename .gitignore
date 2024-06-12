@@ -15,3 +15,5 @@ var/log/*
 
 /vendor
 !/assets/vendor
+
+node_modules
