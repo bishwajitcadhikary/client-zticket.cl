@@ -44,4 +44,5 @@ return [
     CoreSphere\ConsoleBundle\CoreSphereConsoleBundle::class => ['all' => true],
     Presta\SitemapBundle\PrestaSitemapBundle::class => ['all' => true],
     Sentry\SentryBundle\SentryBundle::class => ['prod' => true],
+    Inspector\Symfony\Bundle\InspectorBundle::class => ['all' => true],
 ];
