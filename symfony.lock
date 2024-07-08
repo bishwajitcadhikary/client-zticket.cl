@@ -243,18 +243,6 @@
     "imagine/imagine": {
         "version": "v0.7.1"
     },
-    "inspector-apm/inspector-symfony": {
-        "version": "1.1",
-        "recipe": {
-            "repo": "github.com/symfony/recipes-contrib",
-            "branch": "main",
-            "version": "1.0",
-            "ref": "fefb11e1366fc61c05f82296d98d4fb3210aa06d"
-        },
-        "files": [
-            "config/packages/inspector.yaml"
-        ]
-    },
     "jdorn/sql-formatter": {
         "version": "v1.2.17"
     },
