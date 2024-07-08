@@ -30,6 +30,7 @@
         "liip/imagine-bundle": "^2.1",
         "mercadopago/dx-php": "^2.6",
         "nelmio/cors-bundle": "^2.0",
+        "nelmio/security-bundle": "^3.0",
         "ninsuo/symfony-collection": "^2.1",
         "paypal/rest-api-sdk-php": "*",
         "payum/offline": "^1.5",
