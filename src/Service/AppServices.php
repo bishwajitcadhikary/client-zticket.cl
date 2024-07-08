@@ -110,7 +110,7 @@ class AppServices {
     }
 
     // Gets a setting from the cache / db
-    public function getSetting($key) {
+    public function getSetting($key, $default = null) {
 
         $settingcache = $this->cache->getItem('settings_' . $key);
         if ($settingcache->isHit()) {
@@ -119,12 +119,12 @@ class AppServices {
         $setting = $this->em->getRepository('App\Entity\Settings')->findOneByKey($key);
 
         if (!$setting) {
-            return null;
+            return $default;
         }
 
         $settingcache->set($setting->getValue());
         $this->cache->save($settingcache);
-        return ($setting ? ($setting->getValue()) : ( null));
+        return ($setting->getValue());
     }
 
     // Sets a setting from the cache / db
@@ -218,10 +218,10 @@ class AppServices {
         }
         if ($user->hasRole("ROLE_ATTENDEE")) {
             $order->setTicketFee($this->getSetting("ticket_fee_online"));
-            $order->setTicketPricePercentageCut($this->getSetting("online_ticket_price_percentage_cut"));
+            $order->setTicketPricePercentageCut($this->getSetting("online_ticket_price_percentage_cut", 0));
         } else if ($user->hasRole("ROLE_POINTOFSALE")) {
             $order->setTicketFee($this->getSetting("ticket_fee_pos"));
-            $order->setTicketPricePercentageCut($this->getSetting("pos_ticket_price_percentage_cut"));
+            $order->setTicketPricePercentageCut($this->getSetting("pos_ticket_price_percentage_cut", 0));
         }
         $order->setCurrencyCcy($this->getSetting("currency_ccy"));
         $order->setCurrencySymbol($this->getSetting("currency_symbol"));

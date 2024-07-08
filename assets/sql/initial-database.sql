@@ -3618,7 +3618,7 @@ CREATE TABLE IF NOT EXISTS `eventic_order` (
   `note` varchar(1000) COLLATE utf8_unicode_ci DEFAULT NULL,
   `status` int(11) NOT NULL,
   `ticket_fee` decimal(10,2) NOT NULL,
-  `ticket_price_percentage_cut` int(11) NOT NULL,
+  `ticket_price_percentage_cut` int(11) DEFAULT NULL,
   `currency_ccy` varchar(10) COLLATE utf8_unicode_ci NOT NULL,
   `currency_symbol` varchar(10) COLLATE utf8_unicode_ci NOT NULL,
   `created_at` datetime NOT NULL,

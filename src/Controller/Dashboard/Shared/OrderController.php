@@ -193,7 +193,7 @@ class OrderController extends Controller {
         } else {
 
             if (!$request->query->get('orderReference')) {
-// Check referer
+                // Check referer
                 $referer = $request->headers->get('referer');
                 if (!\is_string($referer) || !$referer) {
                     $this->addFlash('info', $translator->trans('You must review your cart before proceeding to checkout'));
@@ -206,13 +206,13 @@ class OrderController extends Controller {
                     }
                 }
 
-// Recheck cart status
+                // Recheck cart status
                 if (!count($this->getUser()->getCartelements())) {
                     $this->addFlash('error', $translator->trans('Your cart is empty'));
                     return $this->redirectToRoute("dashboard_index");
                 }
 
-// Check event sale status
+                // Check event sale status
                 foreach ($this->getUser()->getCartelements() as $cartelement) {
                     if (!$cartelement->getEventticket()->isOnSale()) {
                         $em->remove($cartelement);
@@ -229,7 +229,7 @@ class OrderController extends Controller {
                     }
                 }
 
-// Remove previous ticket reservations
+                // Remove previous ticket reservations
                 if (count($this->getUser()->getTicketreservations())) {
                     foreach ($this->getUser()->getTicketreservations() as $ticketreservation) {
                         $em->remove($ticketreservation);
@@ -246,7 +246,7 @@ class OrderController extends Controller {
                 $em->flush();
                 $services->emptyCart($this->getUser());
 
-// Create new ticket reservations according to current cart
+                // Create new ticket reservations according to current cart
                 foreach ($order->getOrderelements() as $orderElement) {
                     $ticketreservation = new TicketReservation();
                     $ticketreservation->setEventticket($orderElement->getEventticket());
