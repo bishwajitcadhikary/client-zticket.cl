@@ -43,5 +43,4 @@ return [
     Exercise\HTMLPurifierBundle\ExerciseHTMLPurifierBundle::class => ['all' => true],
     CoreSphere\ConsoleBundle\CoreSphereConsoleBundle::class => ['all' => true],
     Presta\SitemapBundle\PrestaSitemapBundle::class => ['all' => true],
-    Nelmio\SecurityBundle\NelmioSecurityBundle::class => ['all' => true],
 ];
