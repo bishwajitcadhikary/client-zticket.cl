@@ -2,101 +2,101 @@
   "entrypoints": {
     "app": {
       "js": [
-        "/assets/runtime.5b7a9943.js",
-        "/assets/0.01fae393.js",
-        "/assets/1.39211bc7.js",
-        "/assets/app.9d5bde40.js"
+        "/assets/runtime.a62e363b.js",
+        "/assets/0.a11e63ec.js",
+        "/assets/1.580017fe.js",
+        "/assets/app.02c5cea9.js"
       ],
       "css": [
-        "/assets/app.263b044c.css"
+        "/assets/app.83b6c9bb.css"
       ]
     },
     "app.orange": {
       "js": [
-        "/assets/runtime.5b7a9943.js",
-        "/assets/app.orange.5543bd73.js"
+        "/assets/runtime.a62e363b.js",
+        "/assets/app.orange.d768dc06.js"
       ],
       "css": [
-        "/assets/app.orange.6536ed08.css"
+        "/assets/app.orange.a5a49f79.css"
       ]
     },
     "app.lightblue": {
       "js": [
-        "/assets/runtime.5b7a9943.js",
-        "/assets/app.lightblue.bb69169d.js"
+        "/assets/runtime.a62e363b.js",
+        "/assets/app.lightblue.b32d1025.js"
       ],
       "css": [
-        "/assets/app.lightblue.b3ba21be.css"
+        "/assets/app.lightblue.bb30e0c3.css"
       ]
     },
     "app.darkblue": {
       "js": [
-        "/assets/runtime.5b7a9943.js",
-        "/assets/app.darkblue.3b1d9aeb.js"
+        "/assets/runtime.a62e363b.js",
+        "/assets/app.darkblue.9bca0a1b.js"
       ],
       "css": [
-        "/assets/app.darkblue.6795cc76.css"
+        "/assets/app.darkblue.4398675e.css"
       ]
     },
     "app.yellow": {
       "js": [
-        "/assets/runtime.5b7a9943.js",
-        "/assets/app.yellow.7458608e.js"
+        "/assets/runtime.a62e363b.js",
+        "/assets/app.yellow.8b4f2dcf.js"
       ],
       "css": [
-        "/assets/app.yellow.ef087d75.css"
+        "/assets/app.yellow.84e17c5a.css"
       ]
     },
     "app.purple": {
       "js": [
-        "/assets/runtime.5b7a9943.js",
-        "/assets/app.purple.e97b216d.js"
+        "/assets/runtime.a62e363b.js",
+        "/assets/app.purple.d09061b7.js"
       ],
       "css": [
-        "/assets/app.purple.ae316767.css"
+        "/assets/app.purple.fb14d13c.css"
       ]
     },
     "app.pink": {
       "js": [
-        "/assets/runtime.5b7a9943.js",
-        "/assets/app.pink.a9ca9b70.js"
+        "/assets/runtime.a62e363b.js",
+        "/assets/app.pink.33fe4170.js"
       ],
       "css": [
-        "/assets/app.pink.12cc1f38.css"
+        "/assets/app.pink.8d921fc8.css"
       ]
     },
     "app.red": {
       "js": [
-        "/assets/runtime.5b7a9943.js",
-        "/assets/app.red.b5689089.js"
+        "/assets/runtime.a62e363b.js",
+        "/assets/app.red.6665a9ec.js"
       ],
       "css": [
-        "/assets/app.red.92e72216.css"
+        "/assets/app.red.f2a2d994.css"
       ]
     },
     "app.green": {
       "js": [
-        "/assets/runtime.5b7a9943.js",
-        "/assets/app.green.e28a7e57.js"
+        "/assets/runtime.a62e363b.js",
+        "/assets/app.green.d1eccdb0.js"
       ],
       "css": [
-        "/assets/app.green.948e7287.css"
+        "/assets/app.green.493e68b7.css"
       ]
     },
     "app.dark": {
       "js": [
-        "/assets/runtime.5b7a9943.js",
-        "/assets/app.dark.6555cc1e.js"
+        "/assets/runtime.a62e363b.js",
+        "/assets/app.dark.281c9341.js"
       ],
       "css": [
-        "/assets/app.dark.740bb1c0.css"
+        "/assets/app.dark.00603829.css"
       ]
     },
     "app.fr": {
       "js": [
-        "/assets/runtime.5b7a9943.js",
-        "/assets/0.01fae393.js",
-        "/assets/app.fr.f502e66d.js"
+        "/assets/runtime.a62e363b.js",
+        "/assets/0.a11e63ec.js",
+        "/assets/app.fr.1250dd26.js"
       ],
       "css": [
         "/assets/app.fr.74ed919c.css"
@@ -104,9 +104,9 @@
     },
     "app.es": {
       "js": [
-        "/assets/runtime.5b7a9943.js",
-        "/assets/0.01fae393.js",
-        "/assets/app.es.e777603b.js"
+        "/assets/runtime.a62e363b.js",
+        "/assets/0.a11e63ec.js",
+        "/assets/app.es.2f3d6639.js"
       ],
       "css": [
         "/assets/app.es.15a27e5b.css"
@@ -114,9 +114,9 @@
     },
     "app.ar": {
       "js": [
-        "/assets/runtime.5b7a9943.js",
-        "/assets/0.01fae393.js",
-        "/assets/app.ar.e3da2dfa.js"
+        "/assets/runtime.a62e363b.js",
+        "/assets/0.a11e63ec.js",
+        "/assets/app.ar.2500100a.js"
       ],
       "css": [
         "/assets/app.ar.abc9fb5a.css"
@@ -124,9 +124,9 @@
     },
     "app.de": {
       "js": [
-        "/assets/runtime.5b7a9943.js",
-        "/assets/0.01fae393.js",
-        "/assets/app.de.8b59d26b.js"
+        "/assets/runtime.a62e363b.js",
+        "/assets/0.a11e63ec.js",
+        "/assets/app.de.65f29853.js"
       ],
       "css": [
         "/assets/app.de.c548e2bc.css"
@@ -134,9 +134,9 @@
     },
     "app.pt": {
       "js": [
-        "/assets/runtime.5b7a9943.js",
-        "/assets/0.01fae393.js",
-        "/assets/app.pt.555bc01e.js"
+        "/assets/runtime.a62e363b.js",
+        "/assets/0.a11e63ec.js",
+        "/assets/app.pt.b5ee81ef.js"
       ],
       "css": [
         "/assets/app.pt.b75ce259.css"
@@ -144,9 +144,9 @@
     },
     "app.it": {
       "js": [
-        "/assets/runtime.5b7a9943.js",
-        "/assets/0.01fae393.js",
-        "/assets/app.it.b38ae223.js"
+        "/assets/runtime.a62e363b.js",
+        "/assets/0.a11e63ec.js",
+        "/assets/app.it.002aa01c.js"
       ],
       "css": [
         "/assets/app.it.6fb0bff9.css"
@@ -154,9 +154,9 @@
     },
     "app.br": {
       "js": [
-        "/assets/runtime.5b7a9943.js",
-        "/assets/0.01fae393.js",
-        "/assets/app.br.4c2c5303.js"
+        "/assets/runtime.a62e363b.js",
+        "/assets/0.a11e63ec.js",
+        "/assets/app.br.04466700.js"
       ],
       "css": [
         "/assets/app.br.c11b30f9.css"
@@ -164,40 +164,40 @@
     },
     "events": {
       "js": [
-        "/assets/runtime.5b7a9943.js",
-        "/assets/0.01fae393.js",
-        "/assets/1.39211bc7.js",
-        "/assets/events.2867a35a.js"
+        "/assets/runtime.a62e363b.js",
+        "/assets/0.a11e63ec.js",
+        "/assets/1.580017fe.js",
+        "/assets/events.8a5bc800.js"
       ],
       "css": [
-        "/assets/events.f302585e.css"
+        "/assets/events.94a03417.css"
       ]
     },
     "event": {
       "js": [
-        "/assets/runtime.5b7a9943.js",
-        "/assets/0.01fae393.js",
-        "/assets/1.39211bc7.js",
-        "/assets/event.b5a23e74.js"
+        "/assets/runtime.a62e363b.js",
+        "/assets/0.a11e63ec.js",
+        "/assets/1.580017fe.js",
+        "/assets/event.ced642d0.js"
       ]
     },
     "organizerprofile": {
       "js": [
-        "/assets/runtime.5b7a9943.js",
-        "/assets/0.01fae393.js",
-        "/assets/1.39211bc7.js",
-        "/assets/organizerprofile.0be0cbb7.js"
+        "/assets/runtime.a62e363b.js",
+        "/assets/0.a11e63ec.js",
+        "/assets/1.580017fe.js",
+        "/assets/organizerprofile.12ad24e2.js"
       ]
     },
     "installer": {
       "js": [
-        "/assets/runtime.5b7a9943.js",
-        "/assets/0.01fae393.js",
-        "/assets/1.39211bc7.js",
-        "/assets/installer.7d6a53dd.js"
+        "/assets/runtime.a62e363b.js",
+        "/assets/0.a11e63ec.js",
+        "/assets/1.580017fe.js",
+        "/assets/installer.7e5bd02a.js"
       ],
       "css": [
-        "/assets/installer.4f071861.css"
+        "/assets/installer.569671bd.css"
       ]
     }
   }
