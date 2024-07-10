@@ -1,8 +1,6 @@
 .idea
 .env
 
-public/media/*
-
 var/cache/prod/*
 var/cache/dev/*
 
