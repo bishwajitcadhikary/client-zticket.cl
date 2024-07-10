@@ -29,4 +29,4 @@ jobs:
           key: ${{ secrets.SSH_KEY }}
           source: "."
           target: "/www/wwwroot/zticket.cl"
-          script: sudo chown -R www:www /www/wwwroot/zticket.cl
+          script: find /www/wwwroot/zticket.cl -type f -name '.user.ini' -prune -o -exec chown www:www {} +
