@@ -29,3 +29,5 @@ jobs:
           key: ${{ secrets.SSH_KEY }}
           source: "."
           target: "/www/wwwroot/zticket.cl"
+          scripts: |
+            sudo chown -R www:www /www/wwwroot/zticket.cl
