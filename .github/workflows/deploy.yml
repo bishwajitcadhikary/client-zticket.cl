@@ -19,7 +19,7 @@ jobs:
           php-version: '7.4'
 
       - name: Install dependencies
-        run: composer install
+        run: cp .env.example .env && composer install && rm -rf .env
 
       - name: Copy files via SSH
         uses: appleboy/scp-action@v0.1.3
