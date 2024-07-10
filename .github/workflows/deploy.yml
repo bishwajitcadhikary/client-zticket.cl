@@ -1,32 +1,35 @@
-name: Deploy to Server
-
+name: Deploy to production
 on:
   push:
     branches:
-      - main
+      - master
+#  release:
+#    types: [created]
 
 jobs:
-  deploy:
+  build:
+    name: Build & Deploy
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
+      - name: Checkout Repository
+        uses: actions/checkout@master
 
-      - name: Set up PHP
+      - name: Setup Environment
         uses: shivammathur/setup-php@v2
         with:
           php-version: '7.4'
 
-      - name: Install dependencies
+      - name: Install Composer Packages
         run: cp .env.example .env && composer install && rm -rf .env
 
-      - name: Copy files via SSH
-        uses: appleboy/ssh-action@master
+      - name: Deploy To production
+        uses: bishwajitcadhikary/symfony-deploy@master
         with:
+          user: ${{ secrets.SSH_USER }}
           host: ${{ secrets.SSH_HOST }}
-          username: ${{ secrets.SSH_USER }}
-          key: ${{ secrets.SSH_KEY }}
-          source: "."
-          target: "/www/wwwroot/zticket.cl"
-          script: find /www/wwwroot/zticket.cl -type f -name '.user.ini' -prune -o -exec chown www:www {} +
+          path: ${{ secrets.DEPLOY_PATH }}
+          owner: www
+          commands: |
+            whoami
+        env:
+          DEPLOY_KEY: ${{ secrets.SSH_KEY }}
