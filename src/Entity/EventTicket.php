@@ -282,9 +282,15 @@ class EventTicket {
             return false;
         }
 
-        return
-                $this->eventdate->getEvent()->getOrganizer()->getUser()->isEnabled() && $this->eventdate->getEvent()->getPublished() && $this->eventdate->getActive() && ($this->eventdate->getStartdate() >= new \Datetime) && $this->active && !$this->isSoldOut() && ($this->salesstartdate < new \Datetime || !$this->salesstartdate) && ($this->salesenddate > new \Datetime || !$this->salesenddate) && (!$this->eventdate->payoutRequested())
-        ;
+        return $this->eventdate->getEvent()->getOrganizer()->getUser()->isEnabled()
+            && $this->eventdate->getEvent()->getPublished()
+            && $this->eventdate->getActive()
+            && ($this->eventdate->getStartdate() >= new \Datetime)
+            && $this->active
+            && !$this->isSoldOut()
+            && ($this->salesstartdate < new \Datetime || !$this->salesstartdate)
+            && ($this->salesenddate > new \Datetime || !$this->salesenddate)
+            && (!$this->eventdate->payoutRequested());
     }
 
     public function stringifyStatus() {

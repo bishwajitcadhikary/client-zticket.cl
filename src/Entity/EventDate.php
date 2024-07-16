@@ -2,6 +2,7 @@
 
 namespace App\Entity;
 
+use Datetime;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
@@ -11,7 +12,8 @@ use Symfony\Component\Validator\Constraints as Assert;
  * @ORM\Entity(repositoryClass="App\Repository\EventDateRepository")
  * @ORM\Table(name="eventic_event_date")
  */
-class EventDate {
+class EventDate
+{
 
     /**
      * @ORM\Id()
@@ -106,20 +108,21 @@ class EventDate {
     private $reference;
 
     /**
-     * @var \DateTime
+     * @var DateTime
      * @ORM\Column(type="datetime", nullable=true)
      * @Assert\NotBlank(groups={"create", "update"})
      */
     private $startdate;
 
     /**
-     * @var \DateTime
+     * @var DateTime
      * @ORM\Column(type="datetime", nullable=true)
      * @Assert\GreaterThan(propertyPath="startdate", groups={"create", "update"})
      */
     private $enddate;
 
-    public function __construct() {
+    public function __construct()
+    {
         $this->tickets = new ArrayCollection();
         $this->scanners = new ArrayCollection();
         $this->pointofsales = new ArrayCollection();
@@ -127,11 +130,13 @@ class EventDate {
         $this->payoutRequests = new ArrayCollection();
     }
 
-    public function getId() {
+    public function getId()
+    {
         return $this->id;
     }
 
-    public function getTicketBySectionName($sectionName) {
+    public function getTicketBySectionName($sectionName)
+    {
         foreach ($this->tickets as $ticket) {
             //foreach ($this->getSeatingPlan()->getDesign()['sections'] as $section) {
             foreach ($ticket->getSeatingPlanSections() as $section) {
@@ -143,7 +148,8 @@ class EventDate {
         return null;
     }
 
-    public function getTicketIdBySectionName($sectionName) {
+    public function getTicketIdBySectionName($sectionName)
+    {
         foreach ($this->tickets as $ticket) {
             //foreach ($this->getSeatingPlan()->getDesign()['sections'] as $section) {
             foreach ($ticket->getSeatingPlanSections() as $section) {
@@ -155,7 +161,8 @@ class EventDate {
         return null;
     }
 
-    public function payoutRequested() {
+    public function payoutRequested()
+    {
         foreach ($this->payoutRequests as $payoutRequest) {
             if ($payoutRequest->getStatus() == 0 || $payoutRequest->getStatus() == 1) {
                 return true;
@@ -164,7 +171,8 @@ class EventDate {
         return false;
     }
 
-    public function payoutRequestStatusClass() {
+    public function payoutRequestStatusClass()
+    {
         foreach ($this->payoutRequests as $payoutRequest) {
             if ($payoutRequest->getStatus() == 0 || $payoutRequest->getStatus() == 1) {
                 return $payoutRequest->getStatusClass();
@@ -173,7 +181,8 @@ class EventDate {
         return "Unknown";
     }
 
-    public function payoutRequestStatus() {
+    public function payoutRequestStatus()
+    {
         foreach ($this->payoutRequests as $payoutRequest) {
             if ($payoutRequest->getStatus() == 0 || $payoutRequest->getStatus() == 1) {
                 return $payoutRequest->stringifyStatus();
@@ -182,21 +191,25 @@ class EventDate {
         return "Unknown";
     }
 
-    public function canBeScannedBy($scanner) {
+    public function canBeScannedBy($scanner)
+    {
         return $this->getScanners()->contains($scanner);
     }
 
-    public function isOnSaleByPos($pointOfSale) {
+    public function isOnSaleByPos($pointOfSale)
+    {
         return $this->getPointofsales()->contains($pointOfSale);
     }
 
-    public function getTotalCheckInPercentage() {
+    public function getTotalCheckInPercentage()
+    {
         if ($this->getOrderElementsQuantitySum() == 0)
             return 0;
         return round(($this->getScannedTicketsCount() / $this->getOrderElementsQuantitySum()) * 100);
     }
 
-    public function getScannedTicketsCount() {
+    public function getScannedTicketsCount()
+    {
         $count = 0;
         foreach ($this->tickets as $ticket) {
             $count += $ticket->getScannedTicketsCount();
@@ -204,14 +217,16 @@ class EventDate {
         return $count;
     }
 
-    public function getTotalSalesPercentage() {
+    public function getTotalSalesPercentage()
+    {
         if ($this->getTicketsQuantitySum() == 0)
             return 0;
         else
             return round(($this->getOrderElementsQuantitySum() / $this->getTicketsQuantitySum()) * 100);
     }
 
-    public function getTicketsQuantitySum() {
+    public function getTicketsQuantitySum()
+    {
         $sum = 0;
         foreach ($this->tickets as $eventDateTicket) {
             $sum += $eventDateTicket->getQuantity();
@@ -219,7 +234,8 @@ class EventDate {
         return $sum;
     }
 
-    public function getSales($role = "all", $user = "all", $formattedForPayoutApproval = false, $includeFees = false) {
+    public function getSales($role = "all", $user = "all", $formattedForPayoutApproval = false, $includeFees = false)
+    {
         $sum = 0;
         foreach ($this->tickets as $eventDateTicket) {
             $sum += $eventDateTicket->getSales($role, $user, $formattedForPayoutApproval, $includeFees);
@@ -227,11 +243,13 @@ class EventDate {
         return $sum;
     }
 
-    public function getTotalTicketFees() {
+    public function getTotalTicketFees()
+    {
         return $this->getSales("all", "all", false, true) - $this->getSales();
     }
 
-    public function getTicketPricePercentageCutSum($role = "all") {
+    public function getTicketPricePercentageCutSum($role = "all")
+    {
         $sum = 0;
         foreach ($this->tickets as $eventDateTicket) {
             $sum += $eventDateTicket->getTicketPricePercentageCutSum($role);
@@ -239,11 +257,13 @@ class EventDate {
         return $sum;
     }
 
-    public function getOrganizerPayoutAmount() {
+    public function getOrganizerPayoutAmount()
+    {
         return $this->getSales() - $this->getTicketPricePercentageCutSum() - $this->getSales("ROLE_POINTOFSALE");
     }
 
-    public function displayPosNames() {
+    public function displayPosNames()
+    {
         $pointofsales = '';
         if (count($this->pointofsales) > 0) {
             foreach ($this->pointofsales as $pointofsale) {
@@ -253,7 +273,8 @@ class EventDate {
         return rtrim($pointofsales, ', ');
     }
 
-    public function displayScannersNames() {
+    public function displayScannersNames()
+    {
         $scanners = '';
         if (count($this->scanners) > 0) {
             foreach ($this->scanners as $scanner) {
@@ -263,7 +284,8 @@ class EventDate {
         return rtrim($scanners, ', ');
     }
 
-    public function generateReference($length) {
+    public function generateReference($length)
+    {
         $reference = implode('', [
             bin2hex(random_bytes(2)),
             bin2hex(random_bytes(2)),
@@ -275,7 +297,8 @@ class EventDate {
         return strlen($reference) > $length ? substr($reference, 0, $length) : $reference;
     }
 
-    public function getOrderElementsQuantitySum($status = 1, $user = "all", $role = "all") {
+    public function getOrderElementsQuantitySum($status = 1, $user = "all", $role = "all")
+    {
         $sum = 0;
         foreach ($this->tickets as $ticket) {
             $sum += $ticket->getOrderElementsQuantitySum($status, $user, $role);
@@ -283,7 +306,8 @@ class EventDate {
         return $sum;
     }
 
-    public function isSoldOut() {
+    public function isSoldOut()
+    {
         foreach ($this->tickets as $ticket) {
             if (!$ticket->isSoldOut()) {
                 return false;
@@ -292,7 +316,8 @@ class EventDate {
         return true;
     }
 
-    public function hasATicketOnSale() {
+    public function hasATicketOnSale()
+    {
         foreach ($this->tickets as $ticket) {
             if ($ticket->isOnSale()) {
                 return true;
@@ -301,20 +326,28 @@ class EventDate {
         return false;
     }
 
-    public function isOnSale() {
+    public function isOnSale()
+    {
         return (
-                $this->event->getOrganizer()->getUser()->isEnabled() && $this->active && $this->event->getPublished() && ($this->getStartdate() > new \Datetime) && (!$this->isSoldOut()) && $this->hasATicketOnSale() && (!$this->payoutRequested())
-                );
+            $this->event->getOrganizer()->getUser()->isEnabled()
+            && $this->active
+            && $this->event->getPublished()
+            && ($this->getStartdate() > new Datetime)
+            && (!$this->isSoldOut())
+            && $this->hasATicketOnSale()
+            && (!$this->payoutRequested())
+        );
     }
 
-    public function stringifyStatus() {
+    public function stringifyStatus()
+    {
         if (!$this->event->getOrganizer()->getUser()->isEnabled()) {
             return "Organizer is disabled";
         } else if (!$this->event->getPublished()) {
             return "Event is not published";
         } else if (!$this->active) {
             return "Event date is disabled";
-        } else if ($this->getStartdate() < new \Datetime) {
+        } else if ($this->getStartdate() < new Datetime) {
             return "Event already started";
         } else if ($this->isSoldOut()) {
             return "Sold out";
@@ -327,14 +360,15 @@ class EventDate {
         }
     }
 
-    public function stringifyStatusClass() {
+    public function stringifyStatusClass()
+    {
         if (!$this->event->getOrganizer()->getUser()->isEnabled()) {
             return "danger";
         } else if (!$this->active) {
             return "danger";
         } else if (!$this->event->getPublished()) {
             return "warning";
-        } else if ($this->getStartdate() < new \Datetime) {
+        } else if ($this->getStartdate() < new Datetime) {
             return "info";
         } else if ($this->isSoldOut()) {
             return "warning";
@@ -347,7 +381,8 @@ class EventDate {
         }
     }
 
-    public function isFree() {
+    public function isFree()
+    {
         foreach ($this->tickets as $ticket) {
             if (!$ticket->getFree()) {
                 return false;
@@ -357,7 +392,8 @@ class EventDate {
         }
     }
 
-    public function getCheapestTicket() {
+    public function getCheapestTicket()
+    {
         $cheapestticket = $this->tickets[0];
         foreach ($this->tickets as $ticket) {
             if ($ticket->getSalePrice() > 0) {
@@ -369,11 +405,13 @@ class EventDate {
         return $cheapestticket;
     }
 
-    public function getVenue() {
+    public function getVenue()
+    {
         return $this->venue;
     }
 
-    public function setVenue($venue) {
+    public function setVenue($venue)
+    {
         $this->venue = $venue;
 
         return $this;
@@ -382,11 +420,13 @@ class EventDate {
     /**
      * @return Collection|EventTicket[]
      */
-    public function getTickets() {
+    public function getTickets()
+    {
         return $this->tickets;
     }
 
-    public function addTicket($ticket) {
+    public function addTicket($ticket)
+    {
         if (!$this->tickets->contains($ticket)) {
             $this->tickets[] = $ticket;
             $ticket->setEventdate($this);
@@ -395,7 +435,8 @@ class EventDate {
         return $this;
     }
 
-    public function removeTicket($ticket) {
+    public function removeTicket($ticket)
+    {
         if ($this->tickets->contains($ticket)) {
             $this->tickets->removeElement($ticket);
 // set the owning side to null (unless already changed)
@@ -410,11 +451,13 @@ class EventDate {
     /**
      * @return Collection|Scanner[]
      */
-    public function getScanners() {
+    public function getScanners()
+    {
         return $this->scanners;
     }
 
-    public function addScanner($scanner) {
+    public function addScanner($scanner)
+    {
         if (!$this->scanners->contains($scanner)) {
             $this->scanners[] = $scanner;
         }
@@ -422,7 +465,8 @@ class EventDate {
         return $this;
     }
 
-    public function removeScanner($scanner) {
+    public function removeScanner($scanner)
+    {
         if ($this->scanners->contains($scanner)) {
             $this->scanners->removeElement($scanner);
         }
@@ -433,11 +477,13 @@ class EventDate {
     /**
      * @return Collection|PointOfSale[]
      */
-    public function getPointofsales() {
+    public function getPointofsales()
+    {
         return $this->pointofsales;
     }
 
-    public function addPointofsale($pointofsale) {
+    public function addPointofsale($pointofsale)
+    {
         if (!$this->pointofsales->contains($pointofsale)) {
             $this->pointofsales[] = $pointofsale;
         }
@@ -445,7 +491,8 @@ class EventDate {
         return $this;
     }
 
-    public function removePointofsale($pointofsale) {
+    public function removePointofsale($pointofsale)
+    {
         if ($this->pointofsales->contains($pointofsale)) {
             $this->pointofsales->removeElement($pointofsale);
         }
@@ -453,61 +500,73 @@ class EventDate {
         return $this;
     }
 
-    public function getActive() {
+    public function getActive()
+    {
         return $this->active;
     }
 
-    public function setActive($active) {
+    public function setActive($active)
+    {
         $this->active = $active;
 
         return $this;
     }
 
-    public function getReference() {
+    public function getReference()
+    {
         return $this->reference;
     }
 
-    public function setReference($reference) {
+    public function setReference($reference)
+    {
         $this->reference = $reference;
 
         return $this;
     }
 
-    public function getStartdate() {
+    public function getStartdate()
+    {
         return $this->startdate;
     }
 
-    public function setStartdate($startdate) {
+    public function setStartdate($startdate)
+    {
         $this->startdate = $startdate;
 
         return $this;
     }
 
-    public function getEnddate() {
+    public function getEnddate()
+    {
         return $this->enddate;
     }
 
-    public function setEnddate($enddate) {
+    public function setEnddate($enddate)
+    {
         $this->enddate = $enddate;
 
         return $this;
     }
 
-    public function getEvent() {
+    public function getEvent()
+    {
         return $this->event;
     }
 
-    public function setEvent($event) {
+    public function setEvent($event)
+    {
         $this->event = $event;
 
         return $this;
     }
 
-    public function getOnline() {
+    public function getOnline()
+    {
         return $this->online;
     }
 
-    public function setOnline($online) {
+    public function setOnline($online)
+    {
         $this->online = $online;
 
         return $this;
@@ -516,11 +575,13 @@ class EventDate {
     /**
      * @return Collection|PayoutRequest[]
      */
-    public function getPayoutRequests() {
+    public function getPayoutRequests()
+    {
         return $this->payoutRequests;
     }
 
-    public function addPayoutRequest($payoutRequest) {
+    public function addPayoutRequest($payoutRequest)
+    {
         if (!$this->payoutRequests->contains($payoutRequest)) {
             $this->payoutRequests[] = $payoutRequest;
             $payoutRequest->setEventDate($this);
@@ -529,7 +590,8 @@ class EventDate {
         return $this;
     }
 
-    public function removePayoutRequest($payoutRequest) {
+    public function removePayoutRequest($payoutRequest)
+    {
         if ($this->payoutRequests->contains($payoutRequest)) {
             $this->payoutRequests->removeElement($payoutRequest);
 // set the owning side to null (unless already changed)
@@ -541,21 +603,25 @@ class EventDate {
         return $this;
     }
 
-    public function getSeatingPlan(): ?VenueSeatingPlan {
+    public function getSeatingPlan(): ?VenueSeatingPlan
+    {
         return $this->seatingPlan;
     }
 
-    public function setSeatingPlan(?VenueSeatingPlan $seatingPlan): self {
+    public function setSeatingPlan(?VenueSeatingPlan $seatingPlan): self
+    {
         $this->seatingPlan = $seatingPlan;
 
         return $this;
     }
 
-    public function getHasSeatingPlan(): ?bool {
+    public function getHasSeatingPlan(): ?bool
+    {
         return $this->hasSeatingPlan;
     }
 
-    public function setHasSeatingPlan(?bool $hasSeatingPlan): self {
+    public function setHasSeatingPlan(?bool $hasSeatingPlan): self
+    {
         $this->hasSeatingPlan = $hasSeatingPlan;
 
         return $this;

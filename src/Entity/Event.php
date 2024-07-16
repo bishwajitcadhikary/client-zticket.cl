@@ -2,14 +2,17 @@
 
 namespace App\Entity;
 
+use DateTime;
+use DateTimeImmutable;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Gedmo\Mapping\Annotation as Gedmo;
 use Knp\DoctrineBehaviors\Model as ORMBehaviors;
+use Symfony\Component\HttpFoundation\File\File;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\PropertyAccess\PropertyAccess;
 use Symfony\Component\Validator\Constraints as Assert;
-use Gedmo\Mapping\Annotation as Gedmo;
-use Symfony\Component\HttpFoundation\File\File;
 use Vich\UploaderBundle\Mapping\Annotation as Vich;
 
 /**
@@ -19,7 +22,8 @@ use Vich\UploaderBundle\Mapping\Annotation as Vich;
  * @Gedmo\SoftDeleteable(fieldName="deletedAt", timeAware=false, hardDelete=true)
  * @Vich\Uploadable
  */
-class Event {
+class Event
+{
 
     use ORMBehaviors\Translatable\Translatable;
 
@@ -261,7 +265,7 @@ class Event {
     private $imageDimensions;
 
     /**
-     * @var \DateTime $createdAt
+     * @var DateTime $createdAt
      *
      * @Gedmo\Timestampable(on="create")
      * @ORM\Column(type="datetime")
@@ -269,7 +273,7 @@ class Event {
     private $createdAt;
 
     /**
-     * @var \DateTime $updatedAt
+     * @var DateTime $updatedAt
      *
      * @Gedmo\Timestampable(on="update")
      * @ORM\Column(type="datetime", nullable=true)
@@ -299,7 +303,8 @@ class Event {
      */
     private $showattendees = true;
 
-    public function __construct() {
+    public function __construct()
+    {
         $this->languages = new ArrayCollection();
         $this->audiences = new ArrayCollection();
         $this->views = 0;
@@ -311,7 +316,8 @@ class Event {
         $this->addedtofavoritesby = new ArrayCollection();
     }
 
-    public function hasEventDateWithSeatingPlan() {
+    public function hasEventDateWithSeatingPlan()
+    {
         foreach ($this->eventdates as $eventDate) {
             if ($eventDate->getHasSeatingPlan()) {
                 return true;
@@ -320,7 +326,8 @@ class Event {
         return false;
     }
 
-    public function getSales($role = "all", $user = "all", $formattedForPayoutApproval = false, $includeFees = false) {
+    public function getSales($role = "all", $user = "all", $formattedForPayoutApproval = false, $includeFees = false)
+    {
         $sum = 0;
         foreach ($this->eventdates as $eventDate) {
             $sum += $eventDate->getSales($role, $user, $formattedForPayoutApproval, $includeFees);
@@ -328,7 +335,8 @@ class Event {
         return $sum;
     }
 
-    public function getTicketPricePercentageCutSum($role = "all") {
+    public function getTicketPricePercentageCutSum($role = "all")
+    {
         $sum = 0;
         foreach ($this->eventdates as $eventDate) {
             $sum += $eventDate->getTicketPricePercentageCutSum($role);
@@ -336,7 +344,8 @@ class Event {
         return $sum;
     }
 
-    public function getTotalOrderElementsQuantitySum($status = 1, $user = "all", $role = "all") {
+    public function getTotalOrderElementsQuantitySum($status = 1, $user = "all", $role = "all")
+    {
         $sum = 0;
         foreach ($this->eventdates as $eventDate) {
             $sum += $eventDate->getOrderElementsQuantitySum($status, $user, $role);
@@ -344,7 +353,8 @@ class Event {
         return $sum;
     }
 
-    public function getTotalCheckInPercentage() {
+    public function getTotalCheckInPercentage()
+    {
         if (count($this->eventdates) == 0)
             return 0;
         $eventDatesCheckInPercentageSum = 0;
@@ -354,7 +364,8 @@ class Event {
         return round($eventDatesCheckInPercentageSum / count($this->eventdates));
     }
 
-    public function getTotalSalesPercentage() {
+    public function getTotalSalesPercentage()
+    {
         if (count($this->eventdates) == 0)
             return 0;
         $eventDatesSalesPercentageSum = 0;
@@ -364,7 +375,8 @@ class Event {
         return round($eventDatesSalesPercentageSum / count($this->eventdates));
     }
 
-    public function isRatedBy($user) {
+    public function isRatedBy($user)
+    {
         foreach ($this->reviews as $review) {
             if ($review->getUser() == $user) {
                 return $review;
@@ -373,11 +385,13 @@ class Event {
         return false;
     }
 
-    public function isAddedToFavoritesBy($user) {
+    public function isAddedToFavoritesBy($user)
+    {
         return $this->addedtofavoritesby->contains($user);
     }
 
-    public function stringifyStatus() {
+    public function stringifyStatus()
+    {
         if (!$this->organizer->getUser()->isEnabled()) {
             return "Organizer is disabled";
         } else if (!$this->published) {
@@ -389,7 +403,8 @@ class Event {
         }
     }
 
-    public function stringifyStatusClass() {
+    public function stringifyStatusClass()
+    {
         if (!$this->organizer->getUser()->isEnabled()) {
             return "danger";
         } else if (!$this->published) {
@@ -401,19 +416,21 @@ class Event {
         }
     }
 
-    public function isOnSale() {
+    public function isOnSale()
+    {
         return
-                $this->hasAnEventDateOnSale() &&
-                $this->organizer->getUser()->isEnabled() &&
-                $this->published
-        ;
+            $this->hasAnEventDateOnSale() &&
+            $this->organizer->getUser()->isEnabled() &&
+            $this->published;
     }
 
-    public function hasContactAndSocialMedia() {
+    public function hasContactAndSocialMedia()
+    {
         return ($this->externallink || $this->phonenumber || $this->twitter || $this->instagram || $this->email || $this->facebook || $this->googleplus || $this->linkedin);
     }
 
-    public function displayAudiences() {
+    public function displayAudiences()
+    {
         $audiences = '';
         if (count($this->audiences) > 0) {
             foreach ($this->audiences as $audience) {
@@ -423,7 +440,8 @@ class Event {
         return rtrim($audiences, ', ');
     }
 
-    public function displaySubtitles() {
+    public function displaySubtitles()
+    {
         $subtitles = '';
         if (count($this->subtitles) > 0) {
             foreach ($this->subtitles as $subtitle) {
@@ -433,7 +451,8 @@ class Event {
         return rtrim($subtitles, ', ');
     }
 
-    public function displayLanguages() {
+    public function displayLanguages()
+    {
         $languages = '';
         if (count($this->languages) > 0) {
             foreach ($this->languages as $language) {
@@ -443,14 +462,16 @@ class Event {
         return rtrim($languages, ', ');
     }
 
-    public function getRatingsPercentageForRating($rating) {
+    public function getRatingsPercentageForRating($rating)
+    {
         if (!$this->countVisibleReviews()) {
             return 0;
         }
         return round(($this->getRatingsCountForRating($rating) / $this->countVisibleReviews()) * 100, 1);
     }
 
-    public function getRatingsCountForRating($rating) {
+    public function getRatingsCountForRating($rating)
+    {
         if (!$this->countVisibleReviews()) {
             return 0;
         }
@@ -463,7 +484,8 @@ class Event {
         return $ratingCount;
     }
 
-    public function getRatingAvg() {
+    public function getRatingAvg()
+    {
         if (!$this->countVisibleReviews()) {
             return 0;
         }
@@ -476,7 +498,8 @@ class Event {
         return round($ratingAvg / $this->countVisibleReviews(), 1);
     }
 
-    public function getRatingPercentage() {
+    public function getRatingPercentage()
+    {
         if (!$this->countVisibleReviews()) {
             return 0;
         }
@@ -489,7 +512,8 @@ class Event {
         return round($ratingPercentage / $this->countVisibleReviews(), 1);
     }
 
-    public function countVisibleReviews() {
+    public function countVisibleReviews()
+    {
         $count = 0;
         foreach ($this->reviews as $review) {
             if ($review->getVisible()) {
@@ -499,11 +523,13 @@ class Event {
         return $count;
     }
 
-    public function viewed() {
+    public function viewed()
+    {
         $this->views++;
     }
 
-    public function generateReference($length) {
+    public function generateReference($length)
+    {
         $reference = implode('', [
             bin2hex(random_bytes(2)),
             bin2hex(random_bytes(2)),
@@ -515,7 +541,8 @@ class Event {
         return strlen($reference) > $length ? substr($reference, 0, $length) : $reference;
     }
 
-    public function getFirstVenue() {
+    public function getFirstVenue()
+    {
         foreach ($this->eventdates as $date) {
             if ($date->getVenue()) {
                 return $date->getVenue();
@@ -524,7 +551,8 @@ class Event {
         return null;
     }
 
-    public function getOrderElementsQuantitySum($status = 1) {
+    public function getOrderElementsQuantitySum($status = 1)
+    {
         $sum = 0;
         foreach ($this->eventdates as $eventdate) {
             $sum += $eventdate->getOrderElementsQuantitySum($status);
@@ -532,7 +560,8 @@ class Event {
         return $sum;
     }
 
-    public function hasTwoOrMoreEventDatesOnSale() {
+    public function hasTwoOrMoreEventDatesOnSale()
+    {
         $count = 0;
         foreach ($this->eventdates as $eventdate) {
             if ($eventdate->isOnSale()) {
@@ -542,7 +571,8 @@ class Event {
         return $count >= 2 ? true : false;
     }
 
-    public function hasAnEventDateOnSale() {
+    public function hasAnEventDateOnSale()
+    {
         foreach ($this->eventdates as $eventdate) {
             if ($eventdate->isOnSale()) {
                 return true;
@@ -551,7 +581,8 @@ class Event {
         return false;
     }
 
-    public function getFirstOnSaleEventDate() {
+    public function getFirstOnSaleEventDate()
+    {
         foreach ($this->eventdates as $eventdate) {
             if ($eventdate->isOnSale()) {
                 return $eventdate;
@@ -560,7 +591,8 @@ class Event {
         return null;
     }
 
-    public function isFree() {
+    public function isFree()
+    {
         foreach ($this->eventdates as $eventdate) {
             if (!$eventdate->isFree()) {
                 return false;
@@ -569,7 +601,8 @@ class Event {
         return true;
     }
 
-    public function getCheapestTicket() {
+    public function getCheapestTicket()
+    {
         if (!$this->hasAnEventDateOnSale())
             return null;
         $cheapestticket = $this->getFirstOnSaleEventDate()->getCheapestTicket();
@@ -583,23 +616,28 @@ class Event {
         return $cheapestticket;
     }
 
-    public function __call($method, $arguments) {
+    public function __call($method, $arguments)
+    {
         return PropertyAccess::createPropertyAccessor()->getValue($this->translate(), $method);
     }
 
-    public function getId() {
+    public function getId()
+    {
         return $this->id;
     }
 
-    public function getName() {
+    public function getName()
+    {
         return $this->translate()->getName();
     }
 
-    public function getSlug() {
+    public function getSlug()
+    {
         return $this->translate()->getSlug();
     }
 
-    public function getDescription() {
+    public function getDescription()
+    {
         return $this->translate()->getDescription();
     }
 
@@ -610,27 +648,31 @@ class Event {
      * must be able to accept an instance of 'File' as the bundle will inject one here
      * during Doctrine hydration.
      *
-     * @param File|\Symfony\Component\HttpFoundation\File\UploadedFile $imageFile
+     * @param File|UploadedFile $imageFile
      */
-    public function setImageFile(File $imageFile = null) {
+    public function setImageFile(File $imageFile = null)
+    {
         $this->imageFile = $imageFile;
 
         if (null !== $imageFile) {
 // It is required that at least one field changes if you are using doctrine
 // otherwise the event listeners won't be called and the file is lost
-            $this->updatedAt = new \DateTimeImmutable();
+            $this->updatedAt = new DateTimeImmutable();
         }
     }
 
-    public function getImageFile() {
+    public function getImageFile()
+    {
         return $this->imageFile;
     }
 
-    public function getImagePath() {
+    public function getImagePath()
+    {
         return 'uploads/events/' . $this->imageName;
     }
 
-    public function getImagePlaceholder($size = "default") {
+    public function getImagePlaceholder($size = "default")
+    {
         if ($size == "small") {
             return "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEYAAABGCAMAAABG8BK2AAAAXVBMVEUAAAD2dhH2dhH2dhH2dhH2dhH2dhH2dhH2dhH2dhH2dhH2dhH2dhH2dhH2dhH2dhH2dhH2dhH2dhH2dhH2dhH2dhH2dhH2dhH2dhH2dhH2dhH2dhH2dhH2dhH2dhHkayjUAAAAHnRSTlMABQ0PEBEcKixARkdJSk1WYmRmZ3R1eHl7f4WjsMpiv/ZRAAAAtUlEQVRYw+3X2Q7CIBCFYVqRLmoH3Oly3v8xvfCiJrYsSjRp578l+RJIIIMQHLfEMiKiYmKhICLKQhkJAHZiwQKAXC2zPWjTAsBg3hsAoDW6zj3KDWEdncoZSOBsEJ5jX/sIpp5ndASj5xkTwRhm/s101lcXwijv9VXMMPMzRlZj5edM9XKTemaYWTNT9mNXfm++YzQANMpX45m2Es1+iSZRcQlWTs7TuydRnn8GX3qXC45bXA+ADIuZ4XkIYQAAAABJRU5ErkJggg==";
         } else {
@@ -638,111 +680,133 @@ class Event {
         }
     }
 
-    public function getUpdatedAt() {
+    public function getUpdatedAt()
+    {
         return $this->updatedAt == $this->createdAt ? null : $this->updatedAt;
     }
 
-    public function getCategory() {
+    public function getCategory()
+    {
         return $this->category;
     }
 
-    public function setCategory(Category $category) {
+    public function setCategory(Category $category)
+    {
         $this->category = $category;
 
         return $this;
     }
 
-    public function getOrganizer() {
+    public function getOrganizer()
+    {
         return $this->organizer;
     }
 
-    public function setOrganizer(Organizer $organizer) {
+    public function setOrganizer(Organizer $organizer)
+    {
         $this->organizer = $organizer;
 
         return $this;
     }
 
-    public function getImageName() {
+    public function getImageName()
+    {
         return $this->imageName;
     }
 
-    public function setImageName($imageName) {
+    public function setImageName($imageName)
+    {
         $this->imageName = $imageName;
 
         return $this;
     }
 
-    public function getImageSize() {
+    public function getImageSize()
+    {
         return $this->imageSize;
     }
 
-    public function setImageSize($imageSize) {
+    public function setImageSize($imageSize)
+    {
         $this->imageSize = $imageSize;
 
         return $this;
     }
 
-    public function getImageMimeType() {
+    public function getImageMimeType()
+    {
         return $this->imageMimeType;
     }
 
-    public function setImageMimeType($imageMimeType) {
+    public function setImageMimeType($imageMimeType)
+    {
         $this->imageMimeType = $imageMimeType;
 
         return $this;
     }
 
-    public function getImageOriginalName() {
+    public function getImageOriginalName()
+    {
         return $this->imageOriginalName;
     }
 
-    public function setImageOriginalName($imageOriginalName) {
+    public function setImageOriginalName($imageOriginalName)
+    {
         $this->imageOriginalName = $imageOriginalName;
 
         return $this;
     }
 
-    public function getImageDimensions() {
+    public function getImageDimensions()
+    {
         return $this->imageDimensions;
     }
 
-    public function setImageDimensions($imageDimensions) {
+    public function setImageDimensions($imageDimensions)
+    {
         $this->imageDimensions = $imageDimensions;
 
         return $this;
     }
 
-    public function getCreatedAt() {
+    public function getCreatedAt()
+    {
         return $this->createdAt;
     }
 
-    public function setCreatedAt($createdAt) {
+    public function setCreatedAt($createdAt)
+    {
         $this->createdAt = $createdAt;
 
         return $this;
     }
 
-    public function setUpdatedAt($updatedAt) {
+    public function setUpdatedAt($updatedAt)
+    {
         $this->updatedAt = $updatedAt;
 
         return $this;
     }
 
-    public function getDeletedAt() {
+    public function getDeletedAt()
+    {
         return $this->deletedAt;
     }
 
-    public function setDeletedAt($deletedAt) {
+    public function setDeletedAt($deletedAt)
+    {
         $this->deletedAt = $deletedAt;
 
         return $this;
     }
 
-    public function getPublished() {
+    public function getPublished()
+    {
         return $this->published;
     }
 
-    public function setPublished($published) {
+    public function setPublished($published)
+    {
         $this->published = $published;
 
         return $this;
@@ -751,11 +815,13 @@ class Event {
     /**
      * @return Collection|Language[]
      */
-    public function getLanguages() {
+    public function getLanguages()
+    {
         return $this->languages;
     }
 
-    public function addLanguage($language) {
+    public function addLanguage($language)
+    {
         if (!$this->languages->contains($language)) {
             $this->languages[] = $language;
         }
@@ -763,7 +829,8 @@ class Event {
         return $this;
     }
 
-    public function removeLanguage($language) {
+    public function removeLanguage($language)
+    {
         if ($this->languages->contains($language)) {
             $this->languages->removeElement($language);
         }
@@ -774,11 +841,13 @@ class Event {
     /**
      * @return Collection|Audience[]
      */
-    public function getAudiences() {
+    public function getAudiences()
+    {
         return $this->audiences;
     }
 
-    public function addAudience($audience) {
+    public function addAudience($audience)
+    {
         if (!$this->audiences->contains($audience)) {
             $this->audiences[] = $audience;
         }
@@ -786,7 +855,8 @@ class Event {
         return $this;
     }
 
-    public function removeAudience($audience) {
+    public function removeAudience($audience)
+    {
         if ($this->audiences->contains($audience)) {
             $this->audiences->removeElement($audience);
         }
@@ -794,51 +864,61 @@ class Event {
         return $this;
     }
 
-    public function getReference() {
+    public function getReference()
+    {
         return $this->reference;
     }
 
-    public function setReference($reference) {
+    public function setReference($reference)
+    {
         $this->reference = $reference;
 
         return $this;
     }
 
-    public function getViews() {
+    public function getViews()
+    {
         return $this->views;
     }
 
-    public function setViews($views) {
+    public function setViews($views)
+    {
         $this->views = $views;
 
         return $this;
     }
 
-    public function getYoutubeurl() {
+    public function getYoutubeurl()
+    {
         return $this->youtubeurl;
     }
 
-    public function setYoutubeurl($youtubeurl) {
+    public function setYoutubeurl($youtubeurl)
+    {
         $this->youtubeurl = $youtubeurl;
 
         return $this;
     }
 
-    public function getExternallink() {
+    public function getExternallink()
+    {
         return $this->externallink;
     }
 
-    public function setExternallink($externallink) {
+    public function setExternallink($externallink)
+    {
         $this->externallink = $externallink;
 
         return $this;
     }
 
-    public function getCountry() {
+    public function getCountry()
+    {
         return $this->country;
     }
 
-    public function setCountry($country) {
+    public function setCountry($country)
+    {
         $this->country = $country;
 
         return $this;
@@ -847,11 +927,13 @@ class Event {
     /**
      * @return Collection|EventDate[]
      */
-    public function getEventdates() {
+    public function getEventdates()
+    {
         return $this->eventdates;
     }
 
-    public function addEventdate($eventdate) {
+    public function addEventdate($eventdate)
+    {
         if (!$this->eventdates->contains($eventdate)) {
             $this->eventdates[] = $eventdate;
             $eventdate->setEvent($this);
@@ -860,7 +942,8 @@ class Event {
         return $this;
     }
 
-    public function removeEventdate($eventdate) {
+    public function removeEventdate($eventdate)
+    {
         if ($this->eventdates->contains($eventdate)) {
             $this->eventdates->removeElement($eventdate);
 // set the owning side to null (unless already changed)
@@ -875,11 +958,13 @@ class Event {
     /**
      * @return Collection|EventImage[]
      */
-    public function getImages() {
+    public function getImages()
+    {
         return $this->images;
     }
 
-    public function addImage($image) {
+    public function addImage($image)
+    {
         if (!$this->images->contains($image)) {
             $this->images[] = $image;
             $image->setEvent($this);
@@ -888,7 +973,8 @@ class Event {
         return $this;
     }
 
-    public function removeImage($image) {
+    public function removeImage($image)
+    {
         if ($this->images->contains($image)) {
             $this->images->removeElement($image);
 // set the owning side to null (unless already changed)
@@ -900,21 +986,25 @@ class Event {
         return $this;
     }
 
-    public function getArtists() {
+    public function getArtists()
+    {
         return $this->artists;
     }
 
-    public function setArtists($artists) {
+    public function setArtists($artists)
+    {
         $this->artists = $artists;
 
         return $this;
     }
 
-    public function getTags() {
+    public function getTags()
+    {
         return $this->tags;
     }
 
-    public function setTags($tags) {
+    public function setTags($tags)
+    {
         $this->tags = $tags;
 
         return $this;
@@ -923,11 +1013,13 @@ class Event {
     /**
      * @return Collection|Language[]
      */
-    public function getSubtitles() {
+    public function getSubtitles()
+    {
         return $this->subtitles;
     }
 
-    public function addSubtitle($subtitle) {
+    public function addSubtitle($subtitle)
+    {
         if (!$this->subtitles->contains($subtitle)) {
             $this->subtitles[] = $subtitle;
         }
@@ -935,7 +1027,8 @@ class Event {
         return $this;
     }
 
-    public function removeSubtitle($subtitle) {
+    public function removeSubtitle($subtitle)
+    {
         if ($this->subtitles->contains($subtitle)) {
             $this->subtitles->removeElement($subtitle);
         }
@@ -943,91 +1036,109 @@ class Event {
         return $this;
     }
 
-    public function getYear() {
+    public function getYear()
+    {
         return $this->year;
     }
 
-    public function setYear($year) {
+    public function setYear($year)
+    {
         $this->year = $year;
 
         return $this;
     }
 
-    public function getPhonenumber() {
+    public function getPhonenumber()
+    {
         return $this->phonenumber;
     }
 
-    public function setPhonenumber($phonenumber) {
+    public function setPhonenumber($phonenumber)
+    {
         $this->phonenumber = $phonenumber;
 
         return $this;
     }
 
-    public function getEmail() {
+    public function getEmail()
+    {
         return $this->email;
     }
 
-    public function setEmail($email) {
+    public function setEmail($email)
+    {
         $this->email = $email;
 
         return $this;
     }
 
-    public function getTwitter() {
+    public function getTwitter()
+    {
         return $this->twitter;
     }
 
-    public function setTwitter($twitter) {
+    public function setTwitter($twitter)
+    {
         $this->twitter = $twitter;
 
         return $this;
     }
 
-    public function getInstagram() {
+    public function getInstagram()
+    {
         return $this->instagram;
     }
 
-    public function setInstagram($instagram) {
+    public function setInstagram($instagram)
+    {
         $this->instagram = $instagram;
 
         return $this;
     }
 
-    public function getFacebook() {
+    public function getFacebook()
+    {
         return $this->facebook;
     }
 
-    public function setFacebook($facebook) {
+    public function setFacebook($facebook)
+    {
         $this->facebook = $facebook;
 
         return $this;
     }
 
-    public function getGoogleplus() {
+    public function getGoogleplus()
+    {
         return $this->googleplus;
     }
 
-    public function setGoogleplus($googleplus) {
+    public function setGoogleplus($googleplus)
+    {
         $this->googleplus = $googleplus;
 
         return $this;
     }
 
-    public function getLinkedin() {
+    public function getLinkedin()
+    {
         return $this->linkedin;
     }
 
-    public function setLinkedin($linkedin) {
+    public function setLinkedin($linkedin)
+    {
         $this->linkedin = $linkedin;
 
         return $this;
     }
 
-    public function getShowattendees() {
+    public function getShowattendees()
+    {
         return $this->showattendees;
     }
 
-    public function setShowattendees($showattendees) {
+    public function setShowattendees($showattendees)
+    {
         $this->showattendees = $showattendees;
 
         return $this;
@@ -1036,11 +1147,13 @@ class Event {
     /**
      * @return Collection|Review[]
      */
-    public function getReviews() {
+    public function getReviews()
+    {
         return $this->reviews;
     }
 
-    public function addReview($review) {
+    public function addReview($review)
+    {
         if (!$this->reviews->contains($review)) {
             $this->reviews[] = $review;
             $review->setEvent($this);
@@ -1049,7 +1162,8 @@ class Event {
         return $this;
     }
 
-    public function removeReview($review) {
+    public function removeReview($review)
+    {
         if ($this->reviews->contains($review)) {
             $this->reviews->removeElement($review);
 // set the owning side to null (unless already changed)
@@ -1064,11 +1178,13 @@ class Event {
     /**
      * @return Collection|User[]
      */
-    public function getAddedtofavoritesby() {
+    public function getAddedtofavoritesby()
+    {
         return $this->addedtofavoritesby;
     }
 
-    public function addAddedtofavoritesby($addedtofavoritesby) {
+    public function addAddedtofavoritesby($addedtofavoritesby)
+    {
         if (!$this->addedtofavoritesby->contains($addedtofavoritesby)) {
             $this->addedtofavoritesby[] = $addedtofavoritesby;
         }
@@ -1076,7 +1192,8 @@ class Event {
         return $this;
     }
 
-    public function removeAddedtofavoritesby($addedtofavoritesby) {
+    public function removeAddedtofavoritesby($addedtofavoritesby)
+    {
         if ($this->addedtofavoritesby->contains($addedtofavoritesby)) {
             $this->addedtofavoritesby->removeElement($addedtofavoritesby);
         }
@@ -1084,21 +1201,25 @@ class Event {
         return $this;
     }
 
-    public function getEnablereviews() {
+    public function getEnablereviews()
+    {
         return $this->enablereviews;
     }
 
-    public function setEnablereviews($enablereviews) {
+    public function setEnablereviews($enablereviews)
+    {
         $this->enablereviews = $enablereviews;
 
         return $this;
     }
 
-    public function getIsonhomepageslider() {
+    public function getIsonhomepageslider()
+    {
         return $this->isonhomepageslider;
     }
 
-    public function setIsonhomepageslider($isonhomepageslider) {
+    public function setIsonhomepageslider($isonhomepageslider)
+    {
         $this->isonhomepageslider = $isonhomepageslider;
 
         return $this;

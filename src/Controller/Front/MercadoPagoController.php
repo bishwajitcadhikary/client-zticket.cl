@@ -46,7 +46,7 @@ class MercadoPagoController extends Controller {
         $item->currency_id = $services->getSetting("currency_ccy");
         $item->title = $translator->trans("Payment of tickets purchased on %website_name%", array('%website_name%' => $services->getSetting("website_name")));
         $item->quantity = 1;
-        $item->unit_price = $order->getOrderElementsPriceSum(true);
+        $item->unit_price = (int)round($order->getOrderElementsPriceSum(true));
         $preference->items = array($item);
 
         //Payer

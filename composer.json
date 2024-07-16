@@ -71,7 +71,8 @@
         "vich/uploader-bundle": "^1.8",
         "welp/mailchimp-bundle": "^1.2",
         "willdurand/js-translation-bundle": "^2.6",
-        "yellowskies/qr-code-bundle": "^1.2"
+        "yellowskies/qr-code-bundle": "^1.2",
+        "ext-mysqli": "*"
     },
     "require-dev": {
         "doctrine/doctrine-fixtures-bundle": "^3.2",

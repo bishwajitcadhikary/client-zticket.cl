@@ -253,7 +253,7 @@ class AppServices {
         $this->em->flush();
         if ($order->getUser()->hasRole("ROLE_ATTENDEE")) {
             $this->sendOrderConfirmationEmail($order, $order->getPayment()->getClientEmail());
-            //$this->sendElectronicInvoiceConfirmationEmail($order, $order->getPayment()->getClientEmail());
+            $this->sendElectronicInvoiceConfirmationEmail($order, $order->getPayment()->getClientEmail());
         }
     }
 
